@@ -27,8 +27,10 @@ K_bt = diag([EY*Ixx EY*Iyy EY*Izz]); %Bending/torsion stiffness matrix
 %Linear/angular rate of change of frame in reference state
 v_ref = [0;0;1];
 u_ref = [0;0;0];
+ud_ref = u_ref;
+vd_ref = v_ref;
 R_ref = eye(3);
-p_ref= @(s) [0;0;s]; %Initial rod position curve
+%p_ref= @(s) [0;0;s]; %Initial rod position curve
 
 
 R0 = R_ref; %Initial rod orientation at base
@@ -47,7 +49,7 @@ r = [x_t; y_t; 0 0 0 0]; %position vectors of tendons
 pi_ref = zeros(3,n_t);
 pi = zeros(3,n_t);
 pi_d = zeros(3,n_t); %velocity of tendon respect to body frame
-tau = [1 0 1 0]; %Tension for each tendon
+tau = [1 0 0 1]; %Tension for each tendon
 
 %Start initial iteration
 
@@ -65,13 +67,13 @@ H = 0;
 alpha = 0;
 beta =0;
 
-n = R*K_se*(v-v_ref);
-m = R*K_bt*(u-u_ref);
+%n = R*K_se*(v-v_ref);
+%m = R*K_bt*(u-u_ref);
 
 
 %Tendon path curves and variables (function?)
 for i=1:n_t
-pi_ref(:,i) = R_ref*r(:,i)+ p_ref(0);
+%pi_ref(:,i) = R_ref*r(:,i)+ p_ref(0);
 pi(:,i) = R*r(:,i) + p;
 pi_d(:,i) = hat(u)*r(:,i)+v;
 
@@ -94,3 +96,21 @@ beta_i = hat(r(:,i))*alpha_i;
 beta = beta + beta_i;
 end
 
+c = K_bt*ud_ref-hat(u)*K_bt*(u-u_ref)-hat(v)*K_se*(v-v_ref)-beta;
+d = K_se*vd_ref-hat(u)*K_se*(v-v_ref)-alpha;
+
+M = [K_se+A, G; B, K_bt+H];
+invM = inv(M);
+
+vu_d = M\[d;c];
+
+vd = vu_d(1:3);
+ud = vu_d(4:6);
+
+pd = R*v;
+Rd = R*hat(u);
+y = zeros(18,1);
+
+y0 = [p0;R0(:);v;u];
+tspan =[0, 0.01];
+%[t,y] = ode45(odefun,tspan,y0);
