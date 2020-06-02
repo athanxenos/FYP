@@ -8,17 +8,17 @@ L = 1; %Arclength of rod (m)
 ds = 0.01; %Step size
 s = 0:ds:L; %arclength parameter (m)
 n = length(s);
-r = 0.05; %Radius of rod (m)
+rad = 0.0005; %Radius of rod (m)(approx 0.5mm)
 
 %Material parameters
-Area = pi*r^2; %Area of cross section (m^2)
+Area = pi*rad^2; %Area of cross section (m^2)
 EY = 210*10^9; %Young's Modulus (Pa)
 Pois = 0.3125; %Poisson ratio (v)
 GY = 80*10^9;  %Shear Modulus (Pa) G=E/2(1+v)
 
 %Second moments of area of cross section
-Ixx = pi*r^4/4;
-Iyy = pi*r^4/4;
+Ixx = pi*rad^4/4;
+Iyy = pi*rad^4/4;
 Izz = Ixx + Iyy; %Polar moment of inertia
 
 %Stiffness Matrices
@@ -37,11 +37,11 @@ R0 = eye(3); %Initial rod orientation at base
 p0 = [0;0;0]; %Inital rod position at base
 %Guess initial conditions for v,u
 v0=[0;0;1];
-u0=[0.1;0;0];
+u0=[1;0;0];
 
 %Tendon Parameters
 n_t = 4; %Number of tendons
-r_t = 0.03; %Radial location of tendons (m)
+r_t = 0.01; %Radial location of tendons (m)(approx 10mm)
 
 %x,y locations of tendons in rod cross section
 x_t = [0 -r_t 0 r_t];
@@ -55,9 +55,10 @@ F_tendon = zeros(3,n_t);
 L_tendon = zeros(3,n_t);
 
 %Tension Input
-tau = [-1 0 0 0]; %Tension for each tendon
+tau = [1 0 0 0]; %Tension for each tendon
 L_i = 1; %Tendon termination point
-k=find(s==L_i);
+%k=find(s==L_i);
+k=n;
 
 %Setup initial iteration
 R=zeros(3,3,n);
@@ -67,6 +68,7 @@ u=zeros(3,n);
 n_rod=zeros(3,n);
 m=zeros(3,n);
 
+
 %Assign initial values
 R(:,:,1)=R0;
 p(:,1)=p0;
@@ -74,17 +76,17 @@ v(:,1)=v0;
 u(:,1)=u0;
 
 
-A = 0;
-B = 0;
-G = 0;
-H = 0;
-alpha = 0;
-beta =0;
-
 
 
 for j=1:n
     %Tendon path curves and variables (function?)
+    A = 0;
+    B = 0;
+    G = 0;
+    H = 0;
+    alpha = 0;
+    beta =0;
+
     for i=1:n_t
     pid(:,i,j) = R(:,:,j)*(hat(u(:,j))*r(:,i)+v(:,j));
     pid_b(:,i) = hat(u(:,j))*r(:,i)+v(:,j); %Tendon curve in body frame
@@ -130,6 +132,7 @@ for j=1:n
      u(:,j+1) = u(:,j) + ud*ds;
     end
     
+   
 end
 
 
@@ -140,8 +143,8 @@ end
 F_sum = sum(F_tendon,2);
 L_sum = sum(L_tendon,2);
 
-F_error = norm(F_sum-(n_rod(:,k-1)-n_rod(:,k)))
-L_error = norm(L_sum-(m(:,k-1)-m(:,k)))
+F_error = norm(F_sum-(n_rod(:,k-1)-n_rod(:,k)));
+L_error = norm(L_sum-(m(:,k-1)-m(:,k)));
 
 arclength(p(1,:),p(2,:),p(3,:));
 
