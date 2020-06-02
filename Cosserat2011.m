@@ -37,7 +37,7 @@ R0 = eye(3); %Initial rod orientation at base
 p0 = [0;0;0]; %Inital rod position at base
 %Guess initial conditions for v,u
 v0=[0;0;1];
-u0=[1;0;0];
+u0=[-1;0;0];
 
 %Tendon Parameters
 n_t = 4; %Number of tendons
@@ -49,18 +49,23 @@ y_t = [r_t 0 -r_t 0];
 r = [x_t; y_t; 0 0 0 0]; %position vectors of tendons
 
 %Reference position curves for each tendon
-pi = zeros(3,n_t);
-pi_d = zeros(3,n_t); %velocity of tendon respect to body frame
+pid = zeros(3,n_t,n);
+pid_b = zeros(3,n_t); %velocity of tendon respect to body frame
+F_tendon = zeros(3,n_t);
+L_tendon = zeros(3,n_t);
 
 %Tension Input
 tau = [1 0 0 0]; %Tension for each tendon
-
+L_i = 1; %Tendon termination point
+k=find(s==L_i);
 
 %Setup initial iteration
 R=zeros(3,3,n);
 p=zeros(3,n);
 v=zeros(3,n);
 u=zeros(3,n);
+n_rod=zeros(3,n);
+m=zeros(3,n);
 
 %Assign initial values
 R(:,:,1)=R0;
@@ -76,16 +81,15 @@ H = 0;
 alpha = 0;
 beta =0;
 
-%n = R*K_se*(v-v_ref);
-%m = R*K_bt*(u-u_ref);
 
-for j=1:n-1
+
+for j=1:n
     %Tendon path curves and variables (function?)
     for i=1:n_t
-    pi(:,i) = R(:,:,j)*r(:,i) + p(:,j);
-    pi_d(:,i) = hat(u(:,j))*r(:,i)+v(:,j); %Tendon curve in body frame
+    pid(:,i,j) = R(:,:,j)*(hat(u(:,j))*r(:,i)+v(:,j));
+    pid_b(:,i) = hat(u(:,j))*r(:,i)+v(:,j); %Tendon curve in body frame
 
-    A_i = -tau(i)*(hat(pi_d(:,i))^2)/(norm(pi_d(:,i)))^3;
+    A_i = -tau(i)*(hat(pid_b(:,i))^2)/(norm(pid_b(:,i)))^3;
     A = A + A_i;
 
     B_i = hat(r(:,i))*A_i;
@@ -97,7 +101,7 @@ for j=1:n-1
     H_i = -B_i*hat(r(:,i));
     H = H + H_i;
 
-    alpha_i = A_i*(hat(u(:,j))*pi_d(:,i));
+    alpha_i = A_i*(hat(u(:,j))*pid_b(:,i));
     alpha = alpha + alpha_i;
 
     beta_i = hat(r(:,i))*alpha_i;
@@ -106,6 +110,9 @@ for j=1:n-1
 
     c = K_bt*ud_ref-hat(u(:,j))*K_bt*(u(:,j)-u_ref)-hat(v(:,j))*K_se*(v(:,j)-v_ref)-beta;
     d = K_se*vd_ref-hat(u(:,j))*K_se*(v(:,j)-v_ref)-alpha;
+    
+    n_rod(:,j) = R(:,:,j)*K_se*(v(:,j)-v_ref);
+    m(:,j) = R(:,:,j)*K_bt*(u(:,j)-u_ref);
 
     M = [K_se+A, G; B, K_bt+H];
 
@@ -115,12 +122,32 @@ for j=1:n-1
     ud = vu_d(4:6);
     pd = R(:,:,j)*v(:,j);
     Rd = R(:,:,j)*hat(u(:,j));
-
-    R(:,:,j+1) = R(:,:,j) + Rd*ds;
-    p(:,j+1) = p(:,j) + pd*ds;
-    v(:,j+1) = v(:,j) + vd*ds;
-    u(:,j+1) = u(:,j) + ud*ds;
+    
+    if j<101
+     R(:,:,j+1) = R(:,:,j) + Rd*ds;
+     p(:,j+1) = p(:,j) + pd*ds;
+     v(:,j+1) = v(:,j) + vd*ds;
+     u(:,j+1) = u(:,j) + ud*ds;
+    end
+    
 end
+
+
+for i=1:n_t
+    F_tendon(:,i) = -tau(i)*pid(:,i,k)/norm(pid(:,i,k));
+    L_tendon(:,i) = -tau(i)*hat(R(:,:,k)*r(:,i))*pid(:,i,k)/norm(pid(:,i,k));
+end
+F_sum = sum(F_tendon,2);
+L_sum = sum(L_tendon,2);
+
+F_error = norm(F_sum-(n_rod(:,k-1)-n_rod(:,k)))
+L_error = norm(L_sum-(m(:,k-1)-m(:,k)))
+
 arclength(p(1,:),p(2,:),p(3,:))
+
 plot3(p(1,:),p(2,:),p(3,:));
+xlabel('x');
+ylabel('y');
+zlabel('z');
 grid on
+axis([-1,1,-1,1,-1,1]);
