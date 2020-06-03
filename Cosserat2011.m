@@ -37,7 +37,7 @@ R0 = eye(3); %Initial rod orientation at base
 p0 = [0;0;0]; %Inital rod position at base
 %Guess initial conditions for v,u
 v0=[0;0;1];
-u0=[1;0;0];
+u0=[0.5;0;0];
 
 %Tendon Parameters
 n_t = 4; %Number of tendons
@@ -55,7 +55,7 @@ F_tendon = zeros(3,n_t);
 L_tendon = zeros(3,n_t);
 
 %Tension Input
-tau = [1 0 0 0]; %Tension for each tendon
+tau = [0.1 0 0 0]; %Tension for each tendon
 L_i = 1; %Tendon termination point
 %k=find(s==L_i);
 k=n;
@@ -125,7 +125,7 @@ for j=1:n
     pd = R(:,:,j)*v(:,j);
     Rd = R(:,:,j)*hat(u(:,j));
     
-    if j<101
+    if j<102
      R(:,:,j+1) = R(:,:,j) + Rd*ds;
      p(:,j+1) = p(:,j) + pd*ds;
      v(:,j+1) = v(:,j) + vd*ds;
@@ -135,6 +135,8 @@ for j=1:n
    
 end
 
+    n_rod(:,j+1) = R(:,:,j+1)*K_se*(v(:,j+1)-v_ref);
+    m(:,j+1) = R(:,:,j+1)*K_bt*(u(:,j+1)-u_ref);
 
 for i=1:n_t
     F_tendon(:,i) = -tau(i)*pid(:,i,k)/norm(pid(:,i,k));
@@ -143,10 +145,12 @@ end
 F_sum = sum(F_tendon,2);
 L_sum = sum(L_tendon,2);
 
-F_error = norm(F_sum-(n_rod(:,k-1)-n_rod(:,k)));
-L_error = norm(L_sum-(m(:,k-1)-m(:,k)));
+F_err_abs = F_sum-(n_rod(:,k-1)-n_rod(:,k+1))
+L_err_abs = L_sum-(m(:,k-1)-m(:,k+1))
+F_err_rel = norm(F_err_abs/(n_rod(:,k-1)-n_rod(:,k+1)))
+L_err_rel = norm(L_err_abs/(m(:,k-1)-m(:,k+1)))
 
-arclength(p(1,:),p(2,:),p(3,:));
+arclength(p(1,:),p(2,:),p(3,:))
 
 plot3(p(1,:),p(2,:),p(3,:));
 xlabel('x');
