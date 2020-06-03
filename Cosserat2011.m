@@ -147,8 +147,7 @@ L_sum = sum(L_tendon,2);
 
 F_err_abs = F_sum-(n_rod(:,k-1)-n_rod(:,k+1));
 L_err_abs = L_sum-(m(:,k-1)-m(:,k+1));
-F_err_rel = norm(F_err_abs/(n_rod(:,k-1)-n_rod(:,k+1)));
-L_err_rel = norm(L_err_abs/(m(:,k-1)-m(:,k+1)));
+
 
 arclength(p(1,1:end-1),p(2,1:end-1),p(3,1:end-1))
 

@@ -1,7 +1,8 @@
+function [p,F_err_abs, L_err_abs] = CosseratOpti(tau,u0)
+%UNTITLED2 Summary of this function goes here
+%   Detailed explanation goes here
 %Cosserat Model
-clear all
-close all
-clc 
+
 
 global K_se
 global K_bt
@@ -55,10 +56,10 @@ p0 = [0;0;0]; %Inital rod position at base
 
 %Guess initial conditions for v,u
 v0=[0;0;1];
-u0=[-1;0;0];
+%u0=[0.5;0;0];
 
 %Tension Input
-tau = [0.1 0 0 0]; %Tension for each tendon
+%tau = [0.1 0 0 0]; %Tension for each tendon
 
 %Setup initial iteration
 R=zeros(3,3,n);
@@ -105,18 +106,10 @@ end
 F_sum = sum(F_tendon,2);
 L_sum = sum(L_tendon,2);
 
-F_err_abs = norm(F_sum-(n_rod(:,n-1)-n_rod(:,n+1)))
-L_err_abs = norm(L_sum-(m(:,n-1)-m(:,n+1)))
+F_err_abs = norm(F_sum-(n_rod(:,n-1)-n_rod(:,n+1)));
+L_err_abs = norm(L_sum-(m(:,n-1)-m(:,n+1)));
 
 
-%Calculate arclength to check solution feasibility
-arclength = arclength(p(1,1:end-1),p(2,1:end-1),p(3,1:end-1))
 
-%Plot solution
-plot3(p(1,1:end-1),p(2,1:end-1),p(3,1:end-1));
-xlabel('x');
-ylabel('y');
-zlabel('z');
-grid on
-axis([-1,1,-1,1,-1,1]);
-title(['Arclength is ',num2str(arclength)])
+end
+
