@@ -42,7 +42,7 @@ pid_b = zeros(3,n_t); %velocity of tendon respect to body frame
 
 
 %Tension Input
-tau = [1 0 0 0]; %Tension for each tendon
+tau = [0.1 0 0 0]; %Tension for each tendon
 
 %Assign initial values
 R=R0;
