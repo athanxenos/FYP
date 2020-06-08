@@ -106,8 +106,11 @@ end
 F_sum = sum(F_tendon,2);
 L_sum = sum(L_tendon,2);
 
-F_err_abs = norm(F_sum-(n_rod(:,n-1)-n_rod(:,n+1)));
-L_err_abs = norm(L_sum-(m(:,n-1)-m(:,n+1)));
+F_err_abs = norm(F_sum-n_rod(:,n));
+L_err_abs = norm(L_sum-m(:,n));
+
+%F_err_abs = norm(F_sum-(n_rod(:,n-1)-n_rod(:,n+1)));
+%L_err_abs = norm(L_sum-(m(:,n-1)-m(:,n+1)));
 
 
 
