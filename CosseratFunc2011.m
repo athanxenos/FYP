@@ -12,7 +12,7 @@ global ud_ref
 global vd_ref
 
 %Rod Parameters
-L = 1; %Arclength of rod (m)
+L = 0.25; %Arclength of rod (m)
 ds = 0.01; %Step size
 s = 0:ds:L; %arclength parameter (m)
 n = length(s);
@@ -55,10 +55,10 @@ p0 = [0;0;0]; %Inital rod position at base
 
 %Guess initial conditions for v,u
 v0=[0;0;1];
-u0=[-1;0;0];
+u0=[0;0;0];
 
 %Tension Input
-tau = [0.1 0 0 0]; %Tension for each tendon
+tau = [0 0 0 0]; %Tension for each tendon
 
 %Setup initial iteration
 R=zeros(3,3,n);
@@ -121,5 +121,5 @@ xlabel('x');
 ylabel('y');
 zlabel('z');
 grid on
-axis([-1,1,-1,1,-1,1]);
+axis([-0.25,0.25,-0.25,0.25,-0.25,0.25]);
 title(['Arclength is ',num2str(arclength)])

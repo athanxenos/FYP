@@ -1,4 +1,4 @@
-function [p,F_err_abs, L_err_abs] = CosseratOpti(tau,u0)
+function [p] = CosseratOpti(tau,u0)
 %UNTITLED2 Summary of this function goes here
 %   Detailed explanation goes here
 %Cosserat Model
@@ -13,7 +13,7 @@ global ud_ref
 global vd_ref
 
 %Rod Parameters
-L = 1; %Arclength of rod (m)
+L = 0.25; %Arclength of rod (m)
 ds = 0.01; %Step size
 s = 0:ds:L; %arclength parameter (m)
 n = length(s);

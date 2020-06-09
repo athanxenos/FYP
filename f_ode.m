@@ -32,8 +32,9 @@ beta =0;
 for i=1:n_t
     %Tendon curve in body frame
     pid_b(:,i) = hat(u)*r(:,i)+v; 
-
+    
     A_i = -tau(i)*(hat(pid_b(:,i))^2)/(norm(pid_b(:,i)))^3;
+   
     A = A + A_i;
 
     B_i = hat(r(:,i))*A_i;
