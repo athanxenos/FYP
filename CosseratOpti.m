@@ -14,7 +14,7 @@ global vd_ref
 
 %Rod Parameters
 L = 0.25; %Arclength of rod (m)
-ds = 0.01; %Step size
+ds = 0.001; %Step size
 s = 0:ds:L; %arclength parameter (m)
 n = length(s);
 

@@ -55,10 +55,10 @@ p0 = [0;0;0]; %Inital rod position at base
 
 %Guess initial conditions for v,u
 v0=[0;0;1];
-u0=[0;0;0];
+u0=[-1;0;0];
 
 %Tension Input
-tau = [0 0 0 0]; %Tension for each tendon
+tau = [1 0 0 0]; %Tension for each tendon
 
 %Setup initial iteration
 R=zeros(3,3,n);
