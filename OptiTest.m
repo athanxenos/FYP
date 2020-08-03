@@ -1,9 +1,8 @@
 %Cosserat Opti Test Script
+%Fix u0 and vary tau
 clear all
 close all
 clc
-
-
 
 
 step=0:0.5:4;
@@ -22,7 +21,7 @@ for i=1:n
     else
         u0 = [-1;0;0];
     end
-    [p] = CosseratOpti(tau(i,:),u0);
+    [p] = CosseratFunc2011(tau(i,:),u0);
     %[p,F_err(i), L_err(i)] = CosseratOpti(tau,u0(:,i));
     
     

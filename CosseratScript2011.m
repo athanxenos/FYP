@@ -1,11 +1,8 @@
-function [p] = CosseratFunc2011(tau,u0)
-%Cosserat Model Function based on 2011 paper
-%Inputs:
-%u0 - Intial angular rate of change of frame
-%tau - Tendon tension vector (length 4)
-
-%Output:
-%p - Position curve of robot
+%Cosserat Model Script based on 2011 paper
+%Uses RK2 and  f_ode functions to solve model
+clear all
+close all
+clc 
 
 %Define global variables for model
 global K_se
@@ -16,7 +13,6 @@ global u_ref
 global ud_ref
 global vd_ref
 global ds
-
 
 %Rod Parameters
 L = 0.25; %Arclength of rod (m)
@@ -57,14 +53,20 @@ u_ref = [0;0;0];
 ud_ref = [0;0;0];
 vd_ref = [0;0;0];
 
+%/////////// Model Variables ////////////
+%Guess initial conditions for v,u
+v0=[0;0;1]; %Linear rate of change of frame
+u0=[-1;0;0]; %Angular rate of change of frame
+
+%Tension Input
+tau = [1 0 0 0]; %Tension for each tendon (N)
+%////////////////////////////////////////
 
 %Initial Conditions
 R0 = eye(3); %Initial rod orientation at base
 p0 = [0;0;0]; %Inital rod position at base
-v0=[0;0;1]; %Linear rate of change of frame
 n0= R0*K_se*(v0-v_ref); %Initial internal force
 m0= R0*K_bt*(u0-u_ref); %Initial internal moment
-
 
 %Initialise matrices/vectors for system parameters
 R=zeros(3,3,n);
@@ -110,5 +112,15 @@ L_sum = sum(L_tendon,2);
 F_error = norm(F_sum-n_rod(:,n));
 L_error = norm(L_sum-m(:,n));
 
-end
 
+%Calculate arclength to check solution feasibility
+arc = arclength(p(1,:),p(2,:),p(3,:));
+
+%Plot solution
+plot3(p(1,:),p(2,:),p(3,:));
+xlabel('x');
+ylabel('y');
+zlabel('z');
+grid on
+axis([-L,L,-L,L,-L,L]);
+title(['Arclength is ',num2str(arc)])

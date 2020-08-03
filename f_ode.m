@@ -1,12 +1,14 @@
 function [pd,Rd,ud,vd] = f_ode(R,u,v,tau)
-%Function for one iteration of ode
+%Function to evaluate ODE system at one step
+
 %Inputs:
-%Systems variables - p,R matrix,v,u 
-%Tendon tension - tau vector
+%Systems variables at current step - R,u,v 
+%Tension vector - tau
 
 %Outputs:
-%System variable deriatives - pd,Rd,ud,vd
+%System variable deriatives at current step - pd,Rd,ud,vd
 
+%Global variables determined by robot structure
 global K_se
 global K_bt
 global r
@@ -15,10 +17,11 @@ global u_ref
 global ud_ref
 global vd_ref
 
-n_t = size(r,2);
+%Number of tendons
+n_t = 4;
 
-%Reference position curves for each tendon
-pid_b = zeros(3,n_t); %velocity of tendon respect to body frame
+%Initialise key variables
+pid_b = zeros(3,n_t); %Velocity of tendon curve respect to body frame
 
 %Reset intermediate constants
 A = 0;
@@ -29,8 +32,10 @@ alpha = 0;
 beta =0;
 
 %Iterate through each tendon
+
 for i=1:n_t
-    %Tendon curve in body frame
+    
+    %Tendon curve velocity in body frame
     pid_b(:,i) = hat(u)*r(:,i)+v; 
     
     A_i = -tau(i)*(hat(pid_b(:,i))^2)/(norm(pid_b(:,i)))^3;
@@ -51,8 +56,7 @@ for i=1:n_t
 
     beta_i = hat(r(:,i))*alpha_i;
     beta = beta + beta_i;
-    
-    
+       
 end
 
 c = K_bt*ud_ref-hat(u)*K_bt*(u-u_ref)-hat(v)*K_se*(v-v_ref)-beta;
@@ -65,10 +69,10 @@ M = [K_se+A, G; B, K_bt+H];
 vu_d = M\[d;c];
 
 %Derivative calculation
-vd = vu_d(1:3);
-ud = vu_d(4:6);
 pd = R*v;
 Rd = R*hat(u);
 
+%Extract values from vector
+vd = vu_d(1:3);
+ud = vu_d(4:6);
 end
-
