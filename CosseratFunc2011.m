@@ -1,4 +1,4 @@
-function [p] = CosseratFunc2011(tau,u0)
+function [p,F_error,L_error] = CosseratFunc2011(tau,u0)
 %Cosserat Model Function based on 2011 paper
 %Inputs:
 %u0 - Intial angular rate of change of frame
