@@ -6,10 +6,10 @@ close all
 clc
 
 %Set tau input
-tau=[2.5 0 0 0];
+tau=[1 0 0 0];
 
 %Define u0 step size
-step=-2:0.1:2;
+step=-5:0.1:5;
 n=length(step);
 
 %Initialise matrices/vector
@@ -54,8 +54,9 @@ xlabel('ux');
 ylabel('L_error');
 title('L error for fixed tau');
 grid on
+
 %Calculate arclength to check solution feasibility
-arclength = arclength(p(1,1:end-1),p(2,1:end-1),p(3,1:end-1));
+arclength = arclength(p(1,:),p(2,:),p(3,:));
 
 % %Plot solution
 % plot3(p(1,1:end-1),p(2,1:end-1),p(3,1:end-1));

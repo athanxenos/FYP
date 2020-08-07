@@ -107,7 +107,8 @@ end
 F_sum = sum(F_tendon,2);
 L_sum = sum(L_tendon,2);
 
-F_error = norm(F_sum-n_rod(:,n));
+%F_error = norm(F_sum-n_rod(:,n));
+F_error = norm(norm(F_sum)-norm(n_rod(:,n)));
 L_error = norm(L_sum-m(:,n));
 
 end
