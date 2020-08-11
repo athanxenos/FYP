@@ -10,6 +10,8 @@ global K_bt
 global r
 global v_ref
 global tau
+global v0
+
 
 %Rod Parameters
 L = 0.25; %Arclength of rod (m)
@@ -45,61 +47,19 @@ v_ref = [0;0;1];
 %/////////// Model Variables ////////////
 %Guess initial conditions for v,u
 v0=[0;0;1]; %Linear rate of change of frame
-u0=[1;0;0]; %Angular rate of change of frame
-
+%u0=[-1;0;0]; %Angular rate of change of frame
+init_guess = zeros(3,1);
 %Tension Input
 tau = [1 0 0 0]; %Tension for each tendon (N)
 %////////////////////////////////////////
+global p
 
-%Initial Conditions
-R0 = eye(3); %Initial rod orientation at base
-p0 = [0;0;0]; %Inital rod position at base
-n0= R0*K_se*(v0-v_ref); %Initial internal force
-m0= R0*K_bt*u0; %Initial internal moment
+final_guess = fsolve(@RodShootingMethod,init_guess)
+%residual = RodShootingMethod(init_guess)
 
-y0 = [p0 ; reshape(R0,9,1); v0; u0];
-
-
-%Initialise key variables
-pid = zeros(3,n_t);
-F_tendon = zeros(3,n_t);
-L_tendon = zeros(3,n_t);
-
-
-%Iterate solution from s = [0,L] using ode45
-
-[s,y] = ode45(@f_ode45, [0 L], y0);
-n = length(s);
-px = y(:,1);
-py = y(:,2);
-pz = y(:,3);
-
-p= [px py pz];
-R = reshape(y(:,4:12)',3,3,n);
-RL = R(:,:,n);
-v = [y(:,13) y(:,14) y(:,15)];
-vL = v(n,:)';
-u = [y(:,16) y(:,17) y(:,18)];
-uL = u(n,:)';
-
-%Iterate through each tendon
-for i=1:n_t
-    pid(:,i) = RL*(hat(uL)*r(:,i)+vL);
-    F_tendon(:,i) = -tau(i)*pid(:,i)/norm(pid(:,i));
-    L_tendon(:,i) = -tau(i)*hat(RL*r(:,i))*pid(:,i)/norm(pid(:,i));
-end
-
-F_sum = sum(F_tendon,2);
-L_sum = sum(L_tendon,2);
-
-%Evaluate n,m at next step
-nL = RL*K_se*(vL-v_ref);
-mL = RL*K_bt*uL;
-
-F_error = norm(F_sum-nL);
-L_error = norm(L_sum-mL);
-
-residual = [F_error, L_error];
+px = p(:,1);
+py = p(:,2);
+pz = p(:,3);
 
 %Calculate arclength to check solution feasibility
 arc = arclength(px,py,pz);
