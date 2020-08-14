@@ -45,7 +45,7 @@ v_ref = [0;0;1];
 %/////////// Model Variables ////////////
 %Guess initial conditions for v,u
 v0=[0;0;1]; %Linear rate of change of frame
-u0=[1;0;0]; %Angular rate of change of frame
+u0=[-1;0;0]; %Angular rate of change of frame
 
 %Tension Input
 tau = [1 0 0 0]; %Tension for each tendon (N)
@@ -84,22 +84,23 @@ uL = u(n,:)';
 
 %Iterate through each tendon
 for i=1:n_t
-    pid(:,i) = RL*(hat(uL)*r(:,i)+vL);
+    pid(:,i) = hat(uL)*r(:,i)+vL;
     F_tendon(:,i) = -tau(i)*pid(:,i)/norm(pid(:,i));
-    L_tendon(:,i) = -tau(i)*hat(RL*r(:,i))*pid(:,i)/norm(pid(:,i));
+    L_tendon(:,i) = -tau(i)*hat(r(:,i))*pid(:,i)/norm(pid(:,i));
 end
 
 F_sum = sum(F_tendon,2);
 L_sum = sum(L_tendon,2);
 
-%Evaluate n,m at next step
-nL = RL*K_se*(vL-v_ref);
-mL = RL*K_bt*uL;
+%Evaluate n,m at next step (body frame)
+nL = K_se*(vL-v_ref);
+mL = K_bt*uL;
 
-F_error = norm(F_sum-nL);
-L_error = norm(L_sum-mL);
+F_error = F_sum-nL;
+L_error = L_sum-mL;
 
-residual = [F_error, L_error];
+residual = [F_error; L_error]
+
 
 %Calculate arclength to check solution feasibility
 arc = arclength(px,py,pz);

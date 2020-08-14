@@ -1,5 +1,5 @@
 %Cosserat Model Script based on 2011 paper
-%Uses RK2 and  f_ode functions to solve model
+%Uses ode45 and  fsolve functions to solve model
 clear all
 close all
 clc 
@@ -10,8 +10,7 @@ global K_bt
 global r
 global v_ref
 global tau
-global v0
-
+global p
 
 %Rod Parameters
 L = 0.25; %Arclength of rod (m)
@@ -47,16 +46,19 @@ v_ref = [0;0;1];
 %/////////// Model Variables ////////////
 %Guess initial conditions for v,u
 v0=[0;0;1]; %Linear rate of change of frame
-%u0=[-1;0;0]; %Angular rate of change of frame
-init_guess = zeros(3,1);
+u0=[0;0;0]; %Angular rate of change of frame
+
+%Guess input for fsolve
+init_guess = [v0; u0];
+
 %Tension Input
 tau = [1 0 0 0]; %Tension for each tendon (N)
 %////////////////////////////////////////
-global p
 
+%Input initial guess into fsolve to optimise solution
 final_guess = fsolve(@RodShootingMethod,init_guess)
-%residual = RodShootingMethod(init_guess)
 
+%Return solution curve p
 px = p(:,1);
 py = p(:,2);
 pz = p(:,3);
