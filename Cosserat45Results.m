@@ -1,5 +1,5 @@
 %Cosserat Model Script based on 2011 paper
-%Uses ode45 and  fsolve functions to solve model
+%Plots final robot pose for different input tensions
 clear all
 close all
 clc 
@@ -43,7 +43,6 @@ r = [x_t; y_t; 0 0 0 0]; %Position vectors of tendons in body frame
 %Linear/angular rate of change of frame in reference state
 v_ref = [0;0;1];
 
-%/////////// Model Variables ////////////
 %Guess initial conditions for v,u
 v0=[0;0;1]; %Linear rate of change of frame
 u0=[0;0;0]; %Angular rate of change of frame
@@ -51,29 +50,29 @@ u0=[0;0;0]; %Angular rate of change of frame
 %Guess input for fsolve
 init_guess = [v0; u0];
 
-%Tension Input
-tau = [1 0 0 0]; %Tension for each tendon (N)
-%////////////////////////////////////////
+%Define tau step size
+step=0:0.5:10;
+n=length(step);
+tau_range = zeros(n,4);
+tau_range(:,1) = step;
 
-%Input initial guess into fsolve to optimise solution
-final_guess = fsolve(@RodShootingMethod,init_guess);
+for i=1:n
+    %Vary Tension Input
+    tau = tau_range(i,:); %Tension for each tendon (N)
+   
 
-v_final = final_guess(1:3)
-u_final = final_guess(4:6)
-
-%Return solution curve p
-px = p(:,1);
-py = p(:,2);
-pz = p(:,3);
-
-%Calculate arclength to check solution feasibility
-arc = arclength(px,py,pz);
+    %Input initial guess into fsolve to optimise solution
+    final_guess = fsolve(@RodShootingMethod,init_guess);
+    
+    %Plot curve
+    hold on
+    plot3(p(:,1),p(:,2),p(:,3));
+end
 
 %Plot solution
-plot3(px,py,pz);
 xlabel('x');
 ylabel('y');
 zlabel('z');
 grid on
 axis([-L,L,-L,L,-L,L]);
-title(['Arclength is ',num2str(arc)])
+title('Robot poses with varying tension (0-10N)')
