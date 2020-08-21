@@ -1,5 +1,5 @@
-function [yd] = f_ode45(s,y)
-%Function to evaluate ODE system at one step for backbone with tendons
+function [yd] = f_secondary(s,y)
+%Function to evaluate ODE system at one step for secondary backbones
 
 %Inputs:
 %Systems variables described as state vector - y (p,R,v,u)
@@ -75,9 +75,9 @@ vu_d = M\[d;c];
 pd = R*v;
 Rd = R*hat(u);
 
-%Extract values from vector
-vd = vu_d(1:3);
-ud = vu_d(4:6);
+
+vd = -K_se^-1*(hat(u)*K_se*(v-v_ref)+R.'
+ud = 
 
 yd = [pd ; reshape(Rd,9,1); vd; ud];
 end
