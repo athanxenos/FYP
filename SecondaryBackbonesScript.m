@@ -30,9 +30,6 @@ K_bt = diag([EY*Ixx EY*Iyy EY*Izz]); %Bending/torsion stiffness matrix
 %Rod Parameters
 r_t = 0.015; %Radial location of secondary rod (m)(approx 10mm)
 
-%x,y locations of secondary rods in rod cross section
-x_t = 0;
-y_t = r_t; %+Y direction
 
 %Reference Parameters
 %Linear/angular rate of change of frame in reference state
@@ -46,7 +43,7 @@ u0=[-1;0;0]; %Angular rate of change of frame
 
 %Initial Conditions
 R0 = eye(3); %Initial rod orientation at base
-p0 =[x_t; y_t; 0 ]; %Inital rod position at base
+p0 =[0; r_t; 0 ]; %Inital rod position at base
 n0= R0*K_se*(v0-v_ref); %Initial internal force
 m0= R0*K_bt*u0; %Initial internal moment
 
@@ -54,7 +51,7 @@ y0 = [p0 ; reshape(R0,9,1); v0; u0];
 
 %Iterate solution from s = [0,L] using ode45
 
-[s,y] = ode45(@f_ode45, [0 L], y0);
+[s,y] = ode45(@f_secondary, [0 L], y0);
 n = length(s);
 px = y(:,1);
 py = y(:,2);
@@ -76,15 +73,15 @@ mL = K_bt*uL;
 
 
 
-% 
-% %Calculate arclength to check solution feasibility
-% arc = arclength(px,py,pz);
-% 
-% %Plot solution
-% plot3(px,py,pz);
-% xlabel('x');
-% ylabel('y');
-% zlabel('z');
-% grid on
-% axis([-L,L,-L,L,-L,L]);
-% title(['Arclength is ',num2str(arc)])
+
+%Calculate arclength to check solution feasibility
+arc = arclength(px,py,pz);
+
+%Plot solution
+plot3(px,py,pz);
+xlabel('x');
+ylabel('y');
+zlabel('z');
+grid on
+axis([-L,L,-L,L,-L,L]);
+title(['Arclength is ',num2str(arc)])

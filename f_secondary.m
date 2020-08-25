@@ -11,73 +11,20 @@ function [yd] = f_secondary(s,y)
 %Global variables determined by robot structure
 global K_se
 global K_bt
-global r
 global v_ref
-global tau
+
 
 %Unpack state vector
 R = reshape(y(4:12),3,3);
 v = y(13:15);
 u = y(16:18);
 
-%Number of tendons
-n_t = 4;
-
-%Initialise key variables
-pid_b = zeros(3,n_t); %Velocity of tendon curve respect to body frame
-
-%Reset intermediate constants
-A = 0;
-B = 0;
-G = 0;
-H = 0;
-alpha = 0;
-beta =0;
-
-%Iterate through each tendon
-
-for i=1:n_t
-    
-    %Tendon curve velocity in body frame
-    pid_b(:,i) = hat(u)*r(:,i)+v; 
-    
-    A_i = -tau(i)*(hat(pid_b(:,i))^2)/(norm(pid_b(:,i)))^3;
-   
-    A = A + A_i;
-
-    B_i = hat(r(:,i))*A_i;
-    B = B + B_i;
-
-    G_i = -A_i*hat(r(:,i));
-    G = G + G_i;
-
-    H_i = -B_i*hat(r(:,i));
-    H = H + H_i;
-
-    alpha_i = A_i*(hat(u)*pid_b(:,i));
-    alpha = alpha + alpha_i;
-
-    beta_i = hat(r(:,i))*alpha_i;
-    beta = beta + beta_i;
-       
-end
-
-c = -hat(u)*K_bt*u-hat(v)*K_se*(v-v_ref)-beta;
-d = -hat(u)*K_se*(v-v_ref)-alpha;
-
-%Governing system matrix
-M = [K_se+A, G; B, K_bt+H];
-
-%Matrix inverse
-vu_d = M\[d;c];
-
 %Derivative calculation
 pd = R*v;
 Rd = R*hat(u);
 
-
-vd = -K_se^-1*(hat(u)*K_se*(v-v_ref)+R.'
-ud = 
+vd = -K_se^-1*(hat(u)*K_se*(v-v_ref));
+ud = -K_bt^-1*(hat(u)*K_bt*u+hat(v)*K_se*(v-v_ref));
 
 yd = [pd ; reshape(Rd,9,1); vd; ud];
 end
