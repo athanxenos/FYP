@@ -11,6 +11,7 @@ global v_ref
 global p
 global L_L
 
+
 %Rod Parameters
 L = 0.25; %Arclength of rod (m)
 rad = 0.0005; %Radius of secondary rod (m)(approx 0.5mm)
@@ -40,9 +41,9 @@ v_ref = [0;0;1];
 %/////////// Model Variables ////////////
 %Guess initial conditions for v,u
 v0=[0;0;1]; %Linear rate of change of frame
-u0=[-1;0;0]; %Angular rate of change of frame
+u0=[0;0;0]; %Angular rate of change of frame
 
-L_L = [0;-0.01;0];
+L_L = [-0.01;0;0];
 %////////////////////////////////////////
 
 %Guess input for fsolve

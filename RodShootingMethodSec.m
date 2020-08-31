@@ -19,7 +19,7 @@ global L_L
 L = 0.25;
 F_L = [0;0;0];
 
-%Extarct guess values
+%Extract guess values
 v0 = guess(1:3);
 u0 = guess(4:6);
 
