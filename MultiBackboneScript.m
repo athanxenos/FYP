@@ -34,7 +34,9 @@ ps0 = [0 -rad_s 0 rad_s; rad_s 0 -rad_s 0; 0 0 0 0]; %Radial coordinate profile 
 
 %Disc Parameters
 n_d = 2;
-d_L = [L/2;L];
+d1 = L/2;
+d2 = L;
+d_L = [d1;d2];
 
 %Reference Parameters
 %Linear/angular rate of change of frame in reference state
@@ -53,12 +55,20 @@ vb0 = v_guess;
 ub0 = u_guess;
 
 %Integrate central backbone upto first disc
-[pb,Rb,vb,ub] = RodIntegrate(pb0,Rb0,vb0,ub0,d_L(1));
+[pb,Rb,vb,ub,s] = RodIntegrate(pb0,Rb0,vb0,ub0,d_L(1));
+
+
+%Extract normal to disc as z axis of backbone R matrix
+R_disc = Rb(:,:,end);
+p_disc = pb(end,:);
+disc_normal = R_disc(:,3);
 
 
 Rs0 = zeros(3,3,n_s);
 vs0 = zeros(3,n_s);
 us0 = zeros(3,n_s);
+
+
 
 %Define initial conditions for secondary backbones
 for i=1:n_s
@@ -67,13 +77,23 @@ for i=1:n_s
     vs0(:,i) = v_guess;
     us0(:,i) = u_guess;
 
-    [ps_temp,Rs,vs,us] = RodIntegrate(ps0(:,i),Rs0(:,:,i),vs0(:,i),us0(:,i),d_L(1));
+    [ps_temp,Rs,vs,us,s_sec] = RodIntegrate(ps0(:,i),Rs0(:,:,i),vs0(:,i),us0(:,i),d_L(1));
     
     ps(:,:,i) = ps_temp;
  
     pxs(:,i) = ps(:,1,i);
     pys(:,i) = ps(:,2,i);
     pzs(:,i) = ps(:,3,i);  
+end
+
+n=length(s_sec);
+disc_check = zeros(n,n_s);
+
+for i=1:n_s
+    for j=1:n
+    plane_check = R_disc.'*(ps(j,:,i)-p_disc)';
+    disc_check(j,i) = plane_check(end);
+    end
 end
 
 %Return solution curve pb for central backbone
@@ -85,7 +105,7 @@ pz = pb(:,3);
 arc = arclength(px,py,pz);
 
 %Plot solution
-plot3(px,py,pz,pxs,pys,pzs);
+plot3(px,py,pz,'b',pxs,pys,pzs,'r');
 xlabel('x');
 ylabel('y');
 zlabel('z');

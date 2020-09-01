@@ -1,4 +1,4 @@
-function [p,R,v,u] = RodIntegrate(p0,R0,v0,u0,L)
+function [p,R,v,u,s] = RodIntegrate(p0,R0,v0,u0,L)
 %Function that evaluates ODE's for input guess and returns residual when
 %compared to known boundary conditions
 
@@ -8,11 +8,12 @@ function [p,R,v,u] = RodIntegrate(p0,R0,v0,u0,L)
 %Outputs:
 % State variables along rod length - p,R,v,u
 
+
 %Setup initial values for ODE
 y0 = [p0 ; reshape(R0,9,1); v0; u0];
 
 %Solve ODE from 0 to L
-[s,y] = ode45(@f_secondary, [0 L], y0);
+[s,y] = ode45(@f_secondary, [0 L+0.005], y0);
 
 %Extract solution curve values
 n = length(s);
