@@ -21,8 +21,9 @@ f_secondary,
 Multibackbone Model:
 
 MultiBackboneScript,
-RodIntegrate,
-f_secondary,
+RodODE_Eval,
+f_ode45,
+DiscIntersect
 
 
 Useful Functions:
