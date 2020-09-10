@@ -43,5 +43,4 @@ end
 
 %Subtract one step from last iteration
 s_disc = s_disc - step;
-
 end
