@@ -1,5 +1,5 @@
 function [v] = inv_hat(R)
-%Maps SO3 matrics to R3
+%Maps SO3 matrices to R3 vector
 %Inputs:
 %R - 3x3 rotation matrix
 

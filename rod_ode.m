@@ -1,5 +1,5 @@
 function [yd] = rod_ode(s,y)
-%Function to evaluate ODE system at one step for secondary backbones
+%Function to evaluate ODE system at one step for Cosserat Rod model
 
 %Inputs:
 %y (p,R,v,u) - Systems variables described as state vector  
