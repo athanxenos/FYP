@@ -27,6 +27,9 @@ global disc_normal
 global end_normal
 global pb_L
 
+global iteration
+iteration =0;
+tic
 %% Rod Parameters
 L = 0.25; %Arclength of all rods (m)
 rad = 0.0005; %Radius of all rods (m)(approx 0.5mm)
@@ -59,14 +62,14 @@ v_ref = [0;0;1];
 
 %% /////////// Model Variables ////////////
 %Input force/moments at disc and end effector
-F_end = [0;0;0];
+F_end = [1;0;0];
 M_end = [0;0;0];
 F_disc = [0;0;0];
 M_disc = [0;0;0];
 
 %Set initial v,u values for all rods
 v_init = [0;0;1];
-u_init = [1;0;0];
+u_init = [0;0;0];
 
 %Set initial v,u conditions for all rods
 v_total = [v_init;v_init;zeros(16,1)];
@@ -75,7 +78,7 @@ u_total = repmat(u_init,10,1);
 %Create initial guess vector
 init_guess = [v_total;u_total];
 
-final_guess = fsolve(@MultiShootingMethod,init_guess);
+[final_guess,fval,exitflag,output] = fsolve(@MultiShootingMethod,init_guess);
 %% ///////////////////////////////////////////////////
 %Calculate arclength to check solution feasibility
 arc = arclength(pb(:,1),pb(:,2),pb(:,3));
@@ -100,3 +103,4 @@ zlabel('z');
 grid on
 axis([-L,L,-L,L,-L,L]);
 title(['Arclength is ',num2str(arc)])
+time = toc

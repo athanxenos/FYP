@@ -22,6 +22,8 @@ global disc_normal
 global end_normal
 global pb_L
 
+global iteration
+
 %Extract v,u sections from vector
 v_guess = guess(1:22);
 u_guess = guess(23:52);
@@ -201,6 +203,8 @@ E8 = mL_sum + cross(pb_L,nb_L)+mb_L-cross(pb_L,F_end)-M_end;
 
 %Combine Residual Vector
 residual = [E1(:);E2(:);E3;E4;E5(:);E6(:);E7;E8];
-residual(1)
+residual(1);
+iteration =iteration +1;
+iteration
 end
 

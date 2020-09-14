@@ -12,7 +12,6 @@ global v_ref
 global d
 global R_disc
 global p_disc
-
 %% Rod Parameters
 L = 0.25; %Arclength of all rods (m)
 rad = 0.0005; %Radius of all rods (m)(approx 0.5mm)

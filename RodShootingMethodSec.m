@@ -31,7 +31,7 @@ p0 = [0;0;0]; %Inital rod position at base
 y0 = [p0 ; reshape(R0,9,1); v0; u0];
 
 %Solve ODE from 0 to L
-[s,y] = ode45(@f_secondary, [0 L], y0);
+[s,y] = ode45(@rod_ode, [0 L], y0);
 
 %Extract solution curve values
 n = length(s);
