@@ -130,7 +130,7 @@ for i=1:n
 end
 
 %Sum forces at disc end
-nd_minus = sum(n_d,2)-nb_d;
+nd_minus = sum(n_d,2)+nb_d;
 
 %Add guesses for forces at disc start
 nd_plus = sum(nd_guess,2)+nb_dguess;
