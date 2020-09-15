@@ -62,7 +62,7 @@ v_ref = [0;0;1];
 
 %% /////////// Model Variables ////////////
 %Input force/moments at disc and end effector
-F_end = [1;0;0];
+F_end = [0;0;0];
 M_end = [0;0;0];
 F_disc = [0;0;0];
 M_disc = [0;0;0];
