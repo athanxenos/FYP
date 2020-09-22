@@ -99,7 +99,7 @@ mL = K_bt*uL;
 F_error = F_sum-nL;
 L_error = L_sum-mL;
 
-residual = [F_error; L_error]
+residual = [F_error; L_error];
 
 
 %Calculate arclength to check solution feasibility

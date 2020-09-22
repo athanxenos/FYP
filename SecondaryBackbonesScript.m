@@ -51,7 +51,7 @@ y0 = [p0 ; reshape(R0,9,1); v0; u0];
 
 %Iterate solution from s = [0,L] using ode45
 
-[s,y] = ode45(@f_secondary, [0 L], y0);
+[s,y] = ode45(@rod_ode, [0 L], y0);
 n = length(s);
 px = y(:,1);
 py = y(:,2);
