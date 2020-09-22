@@ -63,23 +63,26 @@ v_ref = [0;0;1];
 %% /////////// Model Variables ////////////
 %Input force/moments at disc and end effector 
 F_end = [0;0;0];
-M_end = [0.05;0;0];
+M_end = [0.1;0;0];
 F_disc = [0;0;0];
 M_disc = [0;0;0];
 
 %Set initial v,u values for all rods
 v_init = [0;0;1];
-u_init = [-1;0;0];
+u_init = [0;0;0];
 
 %Initial V values are [0;0;1] for all rods at all discs
 %Secondary rods z element is omitted to keep problem square (52x52)
-v_total = [v_init;v_init;zeros(16,1)];
+%v_total = [v_init;v_init;zeros(16,1)];
+v_total = repmat(v_init,10,1);
 
 %Initial U values for all rods at all discs
 %Ordered as[backbone_base;backbone_disc;secondary_rods_base;secondary_rods_disc]
 %Determine initial shape of rod (C or S)
-u_total = [u_init;-u_init;repmat(u_init,4,1);repmat(-u_init,4,1)];
+
+%u_total = [u_init;-u_init;repmat(u_init,4,1);repmat(-u_init,4,1)];
 %u_total = [repmat(u_init,10,1)];
+u_total = [u_init;-u_init;repmat(u_init(1:2),4,1);repmat(-u_init(1:2),4,1)];
 
 %Create initial guess vector (52 elements)
 init_guess = [v_total;u_total];

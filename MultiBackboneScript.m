@@ -55,13 +55,16 @@ u_init = [-1;0;0];
 
 %Initial V values are [0;0;1] for all rods at all discs
 %Secondary rods z element is omitted to keep problem square (52x52)
-v_total = [v_init;v_init;zeros(16,1)];
+%v_total = [v_init;v_init;zeros(16,1)];
+v_total = repmat(v_init,10,1);
 
 %Initial U values for all rods at all discs
 %Ordered as[backbone_base;backbone_disc;secondary_rods_base;secondary_rods_disc]
 %Determine initial shape of rod (C or S)
-u_total = [u_init;-u_init;repmat(u_init,4,1);repmat(-u_init,4,1)];
+
+%u_total = [u_init;-u_init;repmat(u_init,4,1);repmat(-u_init,4,1)];
 %u_total = [repmat(u_init,10,1)];
+u_total = [u_init;-u_init;repmat(u_init(1:2),4,1);repmat(-u_init(1:2),4,1)];
 
 %Create initial guess vector (52 elements)
 guess = [v_total;u_total];
@@ -71,8 +74,8 @@ guess = [v_total;u_total];
 %[u_back_base, u_back_disc, u_sec_base, u_sec_disc] = guess_extract(guess)
 
 %Extract v,u sections from vector
-v_guess = guess(1:22);
-u_guess = guess(23:52);
+v_guess = guess(1:30);
+u_guess = guess(31:end);
 
 %Extract backbone values at base and disc
 vb0 = v_guess(1:3);
@@ -81,14 +84,14 @@ ub0 = u_guess(1:3);
 ubd = u_guess(4:6);
 
 %Setup secondary rod matrices
-vs0 = ones(3,n);
-vsd = ones(3,n);
+us0 = zeros(3,n);
+usd = zeros(3,n);
 
 %Extract v,u values at base and disc for secondary rods
-vs0(1:2,:) = reshape(v_guess(7:14),[2,n]);
-us0 = reshape(u_guess(7:18),[3,n]);
-vsd(1:2,:) = reshape(v_guess(15:end),[2,n]);
-usd = reshape(u_guess(19:end),[3,n]);
+vs0 = reshape(v_guess(7:18),[3,n]);
+us0(1:2,:) = reshape(u_guess(7:14),[2,n]);
+vsd = reshape(v_guess(19:30),[3,n]);
+usd(1:2,:) = reshape(u_guess(15:22),[2,n]);
 
 %% ////////////////////////////////////////
 
