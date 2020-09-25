@@ -22,11 +22,10 @@ global disc_normal
 global end_normal
 global pb_L
 
-global iteration
 
 %Extract v,u sections from vector
 v_guess = guess(1:30);
-u_guess = guess(31:end);
+u_guess = guess(31:52);
 
 %Extract backbone values at base and disc
 vb0 = v_guess(1:3);
@@ -44,15 +43,14 @@ us0(1:2,:) = reshape(u_guess(7:14),[2,n]);
 vsd = reshape(v_guess(19:30),[3,n]);
 usd(1:2,:) = reshape(u_guess(15:22),[2,n]);
 
+s_disc = guess(53:56);
+
 %Define initial conditions for central backbone
 pb0 = [0;0;0];
 Rb0 = eye(3);
 
 %Initialise variables for secondary backbones
 Rs0 = eye(3);
-
-%Initialise disc intersection arclengths
-s_disc = ones(1,4)*d(1);
 
 %Initialise cells for secondary backbones
 ps = cell(1,n);
@@ -85,17 +83,19 @@ m_d = zeros(3,n);
 md_sum = zeros(3,1);
 nd_guess = zeros(3,n);
 md_guess = zeros(3,n);
+E_inter = zeros(1,n);
 E1 = zeros(2,n);
 E2 = zeros(2,n);
 
 %Integrate secondary rods until they intersect first disc
 for i=1:n
     
-    %Find disc intersection points for each rod
-    [s_disc(i)] = DiscIntersect(r(:,i),Rs0,vs0(:,i),us0(:,i));
-    
     %Integrate secondary rods to first disc
     [ps{i},Rs{i},vs{i},us{i},s_s{i}] = RodODE_Eval(r(:,i),Rs0,vs0(:,i),us0(:,i),0,s_disc(i));
+    
+    %Calculate disc intersection error
+    plane = R_disc.'*(ps{i}(end,:)-p_disc)';
+    E_inter(:,i) = plane(end);
     
     %Calculate positional constraint at disc (local)
     pos_d(:,i) = R_disc'*(ps{i}(end,:)-p_disc)'-r(:,i);
@@ -128,7 +128,7 @@ nd_minus = sum(n_d,2) + nb_d;
 nd_plus = sum(nd_guess,2) + nb_dguess;
 
 %Force Equilibrium Error
-E3 = nd_plus - nd_minus - F_disc;
+E3 = nd_plus + nd_minus - F_disc;
 
 %Moment Equilibrium Error
 E4 = md_sum + cross(p_disc',(nb_dguess - nb_d - F_disc)) + mb_dguess - mb_d - M_disc;
@@ -193,9 +193,7 @@ E7 = sum(n_L,2) + nb_L - F_end;
 E8 = mL_sum + cross(pb_L,nb_L) + mb_L - cross(pb_L,F_end) - M_end;
 
 %Combine Residual Vector
-residual = [E1(:);E2(:);E3;E4;E5(:);E6(:);E7;E8];
+residual = [E_inter(:);E1(:);E2(:);E3;E4;E5(:);E6(:);E7;E8];
 
-iteration =iteration +1;
-iteration
 end
 

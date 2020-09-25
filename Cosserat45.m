@@ -45,10 +45,10 @@ v_ref = [0;0;1];
 %/////////// Model Variables ////////////
 %Guess initial conditions for v,u
 v0=[0;0;1]; %Linear rate of change of frame
-u0=[-1;0;0]; %Angular rate of change of frame
+u0=[0;1;0]; %Angular rate of change of frame
 
 %Tension Input
-tau = [1 0 0 0]; %Tension for each tendon (N)
+tau = [0 1 0 0]; %Tension for each tendon (N)
 %////////////////////////////////////////
 
 %Initial Conditions
@@ -94,7 +94,7 @@ L_sum = sum(L_tendon,2);
 
 %Evaluate n,m at next step (body frame)
 nL = K_se*(vL-v_ref);
-mL = K_bt*uL;
+mL = K_bt*uL
 
 F_error = F_sum-nL;
 L_error = L_sum-mL;

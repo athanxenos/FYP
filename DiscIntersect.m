@@ -36,7 +36,7 @@ while norm(error_val) > tol
     
     %Check for infinite loop if disc intersection not found
     i=i+1;
-    if i>1000
+    if i>10000
         error('Error: could not find disc intersection, check s_disc initial value/tolerance/stepsize ');
     end
 end
