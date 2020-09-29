@@ -72,8 +72,8 @@ nb_d = R_disc*K_se*(vb(end,:)'-v_ref);
 mb_d = R_disc*K_bt*ub(end,:)';
 
 %Calculate n,m guesses at first disc for central backbone (global)
-nb_dguess = R_disc*K_se*(vbd-v_ref);
-mb_dguess = R_disc*K_bt*ubd;
+nb_dguess = -R_disc*K_se*(vbd-v_ref);
+mb_dguess = -R_disc*K_bt*ubd;
 
 %Initialise constraint/error variables
 pos_d = zeros(3,n);
@@ -114,8 +114,8 @@ for i=1:n
     m_d(:,i) = Rs{i}(:,:,end)*K_bt*us{i}(end,:)';
     
     %Calculate n,m guesses at first disc (global)
-    nd_guess(:,i) = Rs{i}(:,:,end)*K_se*(vsd(:,i)-v_ref);
-    md_guess(:,i) = Rs{i}(:,:,end)*K_bt*usd(:,i);
+    nd_guess(:,i) = -Rs{i}(:,:,end)*K_se*(vsd(:,i)-v_ref);
+    md_guess(:,i) = -Rs{i}(:,:,end)*K_bt*usd(:,i);
 
     %Sum moments at disc
     md_sum = md_sum + cross(ps{i}(end,:)',(nd_guess(:,i) - n_d(:,i))) + md_guess(:,i) - m_d(:,i);
@@ -128,7 +128,7 @@ nd_minus = sum(n_d,2) + nb_d;
 nd_plus = sum(nd_guess,2) + nb_dguess;
 
 %Force Equilibrium Error
-E3 = nd_plus + nd_minus - F_disc;
+E3 = nd_plus - nd_minus - F_disc;
 
 %Moment Equilibrium Error
 E4 = md_sum + cross(p_disc',(nb_dguess - nb_d - F_disc)) + mb_dguess - mb_d - M_disc;

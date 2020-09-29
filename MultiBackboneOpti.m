@@ -90,7 +90,7 @@ init_guess = [v_total;u_total;s_disc];
 %Result from solved problem
 %[u_back_base, u_back_disc, u_sec_base, u_sec_disc] = guess_extract(init_guess)
 
-options = optimoptions(@fsolve,'Display','iter-detailed');
+options = optimoptions(@fsolve,'Display','iter-detailed','MaxFunctionEvaluations',20000,'MaxIterations',2000);
 
 [final_guess,fval,exitflag,output] = fsolve(@MultiShootingMethod,init_guess,options);
 %% ///////////////////////////////////////////////////
