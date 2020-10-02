@@ -25,7 +25,7 @@ global pb_L
 
 %Extract v,u sections from vector
 v_guess = guess(1:30);
-u_guess = guess(31:52);
+u_guess = guess(31:60);
 
 %Extract backbone values at base and disc
 vb0 = v_guess(1:3);
@@ -39,11 +39,11 @@ usd = zeros(3,n);
 
 %Extract v,u values at base and disc for secondary rods
 vs0 = reshape(v_guess(7:18),[3,n]);
-us0(1:2,:) = reshape(u_guess(7:14),[2,n]);
+us0 = reshape(u_guess(7:18),[3,n]);
 vsd = reshape(v_guess(19:30),[3,n]);
-usd(1:2,:) = reshape(u_guess(15:22),[2,n]);
+usd = reshape(u_guess(19:30),[3,n]);
 
-s_disc = guess(53:56);
+s_disc = guess(end-3:end);
 
 %Define initial conditions for central backbone
 pb0 = [0;0;0];
@@ -72,8 +72,8 @@ nb_d = R_disc*K_se*(vb(end,:)'-v_ref);
 mb_d = R_disc*K_bt*ub(end,:)';
 
 %Calculate n,m guesses at first disc for central backbone (global)
-nb_dguess = -R_disc*K_se*(vbd-v_ref);
-mb_dguess = -R_disc*K_bt*ubd;
+nb_dguess = R_disc*K_se*(vbd-v_ref);
+mb_dguess = R_disc*K_bt*ubd;
 
 %Initialise constraint/error variables
 pos_d = zeros(3,n);
@@ -114,11 +114,11 @@ for i=1:n
     m_d(:,i) = Rs{i}(:,:,end)*K_bt*us{i}(end,:)';
     
     %Calculate n,m guesses at first disc (global)
-    nd_guess(:,i) = -Rs{i}(:,:,end)*K_se*(vsd(:,i)-v_ref);
-    md_guess(:,i) = -Rs{i}(:,:,end)*K_bt*usd(:,i);
+    nd_guess(:,i) = Rs{i}(:,:,end)*K_se*(vsd(:,i)-v_ref);
+    md_guess(:,i) = Rs{i}(:,:,end)*K_bt*usd(:,i);
 
     %Sum moments at disc
-    md_sum = md_sum + cross(ps{i}(end,:)',(nd_guess(:,i) - n_d(:,i))) + md_guess(:,i) - m_d(:,i);
+    md_sum = md_sum + cross(ps{i}(end,:)',(-nd_guess(:,i) + n_d(:,i))) - md_guess(:,i) +m_d(:,i);
 end
 
 %Sum forces at disc end
@@ -128,10 +128,10 @@ nd_minus = sum(n_d,2) + nb_d;
 nd_plus = sum(nd_guess,2) + nb_dguess;
 
 %Force Equilibrium Error
-E3 = nd_plus - nd_minus - F_disc;
+E3 = -nd_plus + nd_minus - F_disc;
 
 %Moment Equilibrium Error
-E4 = md_sum + cross(p_disc',(nb_dguess - nb_d - F_disc)) + mb_dguess - mb_d - M_disc;
+E4 = md_sum + cross(p_disc',(-nb_dguess + nb_d - F_disc)) - mb_dguess + mb_d - M_disc;
 
 %Integrate central backbone from first disc to end effector
 [pb_L,Rb_L,vb_L,ub_L,s_L] = RodODE_Eval(pb(end,:)',Rb(:,:,end),vbd,ubd,d(1),d(2));
@@ -186,7 +186,7 @@ for i=1:n
     E6(:,i) = inv_hat(logm(Rs{i}(:,:,end)'*Rb_L));
 end
 
-%Force Equilibrium Error
+%Force Equilibrium Errorf
 E7 = sum(n_L,2) + nb_L - F_end;
 
 %Moment Equilibrium Error

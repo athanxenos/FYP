@@ -59,8 +59,8 @@ v_ref = [0;0;1];
 
 %% /////////// Model Variables ////////////
 %Input force/moments at disc and end effector 
-F_end = [1;0;0];
-M_end = [0;0;0];
+F_end = [0;0;0];
+M_end = [1;0;0];
 F_disc = [0;0;0];
 M_disc = [0;0;0];
 
@@ -80,7 +80,8 @@ v_total = repmat(v_init,10,1);
 %u_total = [u_init;-u_init;repmat(u_init,4,1);repmat(-u_init,4,1)];
 %u_total = [repmat(u_init,10,1)];
 %u_total = [u_init;u_init;repmat(u_init(1:2),4,1);repmat(u_init(1:2),4,1)];
-u_total = [u_init;-u_init;repmat(u_init(1:2),4,1);repmat(-u_init(1:2),4,1)];
+%u_total = [u_init;-u_init;repmat(u_init(1:2),4,1);repmat(-u_init(1:2),4,1)];
+u_total = repmat(u_init,10,1);
 
 s_disc = ones(4,1)*d(1);
 
