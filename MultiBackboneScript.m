@@ -5,9 +5,12 @@ close all
 clc 
 
 %Define global variables for model
+%ODE parameters
 global K_se
 global K_bt
 global v_ref
+
+%DiscIntersect variables
 global d
 global R_disc
 global p_disc

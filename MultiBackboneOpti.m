@@ -5,26 +5,29 @@ close all
 clc 
 
 %Define global variables for model
+%ODE parameters
 global K_se
 global K_bt
 global v_ref
 
+%Model Parameters
 global d
-global p_disc
-
-global pb
-global ps
-
 global n
 global r
+
+%Input Variables
 global F_end
 global M_end
 global F_disc
 global M_disc
 
+%Plotting Variables
+global pb
+global ps
+global p_disc
+global pb_L
 global disc_normal
 global end_normal
-global pb_L
 
 %Start timer
 tic
@@ -62,7 +65,7 @@ v_ref = [0;0;1];
 
 %% /////////// Model Variables ////////////
 %Input force/moments at disc and end effector 
-F_end = [0.5;0;0];
+F_end = [1;0;0];
 M_end = [0;0;0];
 F_disc = [0;0;0];
 M_disc = [0;0;0];

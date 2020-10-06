@@ -10,28 +10,30 @@ function [residual] = MultiShootingMethod(guess)
 %Outputs:
 % residual - returns error vector for given guess (56 length minimum)
 
-%Define global variables
+%Define global variables for model
+%ODE parameters
 global K_se
 global K_bt
 global v_ref
 
+%Model Parameters
 global d
-global R_disc
-global p_disc
-
-global pb
-global ps
-
 global n
 global r
+
+%Input Variables
 global F_end
 global M_end
 global F_disc
 global M_disc
 
+%Plotting Variables
+global pb
+global ps
+global p_disc
+global pb_L
 global disc_normal
 global end_normal
-global pb_L
 
 %Extract v,u sections from vector
 v_guess = guess(1:30);
