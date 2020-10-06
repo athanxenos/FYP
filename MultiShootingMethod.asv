@@ -101,8 +101,8 @@ for i=1:n
     [ps{i},Rs{i},vs{i},us{i},s_s{i}] = RodODE_Eval(r(:,i),Rs0,vs0(:,i),us0(:,i),0,s_disc(i));
     
     %Calculate disc intersection error
-    intersect = R_disc.'*(ps{i}(end,:)-p_disc)';
-    E_inter(:,i) = intersect(end);
+    plane = R_disc.'*(ps{i}(end,:)-p_disc)';
+    E_inter(:,i) = plane(end);
     
     %Calculate positional constraint at disc (local)
     pos_D(:,i) = R_disc'*(ps{i}(end,:)-p_disc)' - r(:,i);
@@ -198,6 +198,7 @@ E7 = sum(n_L,2) + nb_L - F_end;
 
 %Moment Equilibrium Error
 E8 = mL_sum + cross(pb_L,nb_L) + mb_L - cross(pb_L,F_end) - M_end;
+
 
 %Combine Residual Vector
 residual = [E_inter(:);E1(:);E2(:);E3;E4;E5(:);E6(:);E7;E8];

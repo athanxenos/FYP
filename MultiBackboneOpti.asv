@@ -1,5 +1,6 @@
 %Cosserat Model Script based on 2017 paper
 %Model multiple backbones with intermediate discs with optimisation
+
 clear variables
 close all
 clc 
@@ -26,7 +27,6 @@ global disc_normal
 global end_normal
 global pb_L
 
-%Start timer
 tic
 %% //////////// Model Parameters ////////////
 %Rod Parameters
@@ -84,14 +84,12 @@ s_disc = ones(4,1)*d(1);
 %Create initial guess vector (64 elements)
 guess = [v_total;u_total;s_disc];
 
-%% ///////// Solve Optimisation Problem //////////
 %Set fsolve options
-options = optimoptions(@fsolve,'Algorithm','levenberg-marquardt','Display','iter-detailed','MaxFunctionEvaluations',100000,'MaxIterations',1000);
+options = optimoptions(@fsolve,'Display','iter-detailed','MaxFunctionEvaluations',100000);
 
 %Solve optimisation problem with fsolve
 [final_guess,fval,exitflag,output] = fsolve(@MultiShootingMethod,guess,options);
-
-%% /////////// Plot Solution //////////////
+%% ///////////////////////////////////////////////////
 %Calculate arclength to check solution feasibility
 arc = arclength(pb(:,1),pb(:,2),pb(:,3));
 
@@ -115,7 +113,4 @@ zlabel('z');
 grid on
 axis([-L,L,-L,L,-L,L]);
 title(['Arclength is ',num2str(arc)])
-
-%Time stats
-time = toc;
-fprintf('Algorithm took %.2f minutes to run\n',time/60);
+time = toc
