@@ -1,8 +1,18 @@
 # FYP
 Investigation of Continuum Manipulators
-
 Code is split up into several models
 
+Main Model:MultiBackboneModel
+
+MultiBackboneScript,
+MultiBackboneOpti,
+MultiBackboneMethod,
+RodODE_Eval,
+DiscIntersect
+rod_ode
+
+
+Old Models:
 Cosserat Tendon Model:
 
 Cosserat45,
@@ -18,15 +28,10 @@ SecondaryBackboneOpti,
 RodShootingMethodSec,
 f_secondary,
 
-Multibackbone Model:
-
-MultiBackboneScript,
-RodODE_Eval,
-f_ode45,
-DiscIntersect
-
 
 Useful Functions:
 
 hat,
-arclength
+inv_hat,
+arclength,
+plotCircle3D
