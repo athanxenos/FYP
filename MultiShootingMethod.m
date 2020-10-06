@@ -118,7 +118,7 @@ for i=1:n
     md_guess(:,i) = Rs{i}(:,:,end)*K_bt*usd(:,i);
 
     %Sum moments at disc
-    md_sum = md_sum + cross(ps{i}(end,:)',(-nd_guess(:,i) + n_d(:,i))) - md_guess(:,i) +m_d(:,i);
+    md_sum = md_sum + cross(ps{i}(end,:)',(nd_guess(:,i) + n_d(:,i))) + md_guess(:,i) + m_d(:,i);
 end
 
 %Sum forces at disc end
@@ -128,10 +128,10 @@ nd_minus = sum(n_d,2) + nb_d;
 nd_plus = sum(nd_guess,2) + nb_dguess;
 
 %Force Equilibrium Error
-E3 = -nd_plus + nd_minus - F_disc;
+E3 = nd_plus + nd_minus - F_disc;
 
 %Moment Equilibrium Error
-E4 = md_sum + cross(p_disc',(-nb_dguess + nb_d - F_disc)) - mb_dguess + mb_d - M_disc;
+E4 = md_sum + cross(p_disc',(nb_dguess + nb_d - F_disc)) + mb_dguess + mb_d - M_disc;
 
 %Integrate central backbone from first disc to end effector
 [pb_L,Rb_L,vb_L,ub_L,s_L] = RodODE_Eval(pb(end,:)',Rb(:,:,end),vbd,ubd,d(1),d(2));
