@@ -65,34 +65,34 @@ v_ref = [0;0;1];
 
 %% /////////// Model Variables ////////////
 %Input force/moments at disc and end effector 
-F_end = [0.5;0;0];
+F_end = [0;0;0];
 M_end = [0;0;0];
-F_disc = [0;0;0];
+F_disc = [0.5;0;0];
 M_disc = [0;0;0];
 
 %Set initial v,u values for all rods
-v_init = [0;0;1];
-u_init = [0;0;0];
+n_init = [0;0;0];
+m_init = [0;0;0];
 
 %% /////// Initialise Model Variables //////////
-%Initial V values are [0;0;1] for all rods at all discs
-v_total = repmat(v_init,10,1);
+%Initial n values are [0;0;0] for all rods at all discs
+n_total = repmat(n_init,10,1);
 
-%Initial U values are [0;0;0] for all rods at all discs
-u_total = repmat(u_init,10,1);
+%Initial m values are [0;0;0] for all rods at all discs
+m_total = repmat(m_init,10,1);
 
 %Initial disc intersection based on straight position
 s_disc = ones(4,1)*d(1);
 
 %Create initial guess vector (64 elements)
-guess = [v_total;u_total;s_disc];
+guess = [n_total;m_total;s_disc];
 
 %% ///////// Solve Optimisation Problem //////////
 %Set fsolve options
 options = optimoptions(@fsolve,'Algorithm','levenberg-marquardt','Display','iter-detailed','MaxFunctionEvaluations',100000,'MaxIterations',1000);
 
 %Solve optimisation problem with fsolve
-[final_guess,fval,exitflag,output] = fsolve(@MultiShootingMethod,guess,options);
+[final_guess,fval,exitflag,output] = fsolve(@MultiShootingMethod_force,guess,options);
 
 %% /////////// Plot Solution //////////////
 %Calculate arclength to check solution feasibility
