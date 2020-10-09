@@ -45,7 +45,7 @@ v_ref = [0;0;1];
 %/////////// Model Variables ////////////
 %Guess initial conditions for v,u
 v0=[0;0;1]; %Linear rate of change of frame
-u0=[0;1;0]; %Angular rate of change of frame
+u0=[0;0;0]; %Angular rate of change of frame
 
 %Tension Input
 tau = [0 1 0 0]; %Tension for each tendon (N)

@@ -15,6 +15,11 @@ global d
 global n
 global r
 
+%Tendon parameters
+global r_t
+global n_t
+global tau
+
 %Input Variables
 global F_end
 global M_end
@@ -59,20 +64,24 @@ r = [0 -rad_s 0 rad_s; rad_s 0 -rad_s 0; 0 0 0 0]; %Radial coordinate profile of
 nd = 2; %Number of discs (not including base,including end effector)
 d = linspace(L/nd,L,nd);  %Disc locations on central backbone
 
+%Tendon Parameters
+%Tendon Parameters
+n_t = 4; %Number of tendons
+rad_t = 0.01; %Radial location of tendons (m)(approx 10mm)
+
+%x,y locations of tendons in rod cross section
+r_t = [0 -rad_t 0 rad_t; rad_t 0 -rad_t 0; 0 0 0 0]; %Position vectors of tendons in body frame
 %Reference Parameters
 %Linear rate of change of frame in reference state
 v_ref = [0;0;1];
 
 %% /////////// Model Variables ////////////
 %Input force/moments at disc and end effector 
-F_end = [0.5;0;0];
+F_end = [0;0;0];
 M_end = [0;0;0];
-F_disc = [0;0;0];
-M_disc = [0;0;0];
 
-%Set initial v,u values for all rods
-v_init = [0;0;1];
-u_init = [0;0;0];
+%Input tension
+tau = [0 1 0 0]; %Tension for each tendon (N)
 
 %% /////// Initialise Model Variables //////////
 %Initial n values are [0;0;0] for all rods at all discs
@@ -92,7 +101,7 @@ guess = [nm_base;nm_disc;s_disc];
 options = optimoptions(@fsolve,'Algorithm','levenberg-marquardt','Display','iter-detailed','MaxFunctionEvaluations',100000,'MaxIterations',1000);
 
 %Solve optimisation problem with fsolve
-[final_guess,fval,exitflag,output] = fsolve(@MultiShootingMethod,guess,options);
+[final_guess,fval,exitflag,output] = fsolve(@MultiShootingMethodTendon,guess,options);
 
 %% /////////// Plot Solution //////////////
 %Calculate arclength to check solution feasibility

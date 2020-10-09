@@ -5,6 +5,10 @@ close all
 clc 
 
 %Define global variables for model
+%Tendon parameters
+global r_t
+global tau
+
 %ODE parameters
 global K_se
 global K_bt
@@ -43,6 +47,14 @@ r = [0 -rad_s 0 rad_s; rad_s 0 -rad_s 0; 0 0 0 0]; %Radial coordinate profile of
 nd = 2; %Number of discs (not including base,including end effector)
 d = linspace(L/nd,L,nd);  %Disc locations on central backbone
 
+%Tendon Parameters
+%Tendon Parameters
+n_t = 4; %Number of tendons
+rad_t = 0.01; %Radial location of tendons (m)(approx 10mm)
+
+%x,y locations of tendons in rod cross section
+r_t = [0 -rad_t 0 rad_t; rad_t 0 -rad_t 0; 0 0 0 0]; %Position vectors of tendons in body frame
+
 %Reference Parameters
 %Linear rate of change of frame in reference state
 v_ref = [0;0;1];
@@ -50,9 +62,10 @@ v_ref = [0;0;1];
 %% /////////// Model Inputs ////////////
 %Input force/moments at disc and end effector 
 F_end = [0;0;0];
-M_end = [0.2;0;0];
-F_disc = [0;0;0];
-M_disc = [-0.2;0;0];
+M_end = [0;0;0];
+
+%Input tension
+tau = [0 0 0 0]; %Tension for each tendon (N)
 
 %Set initial n,m values for all rods
 nm_base = zeros(30,1);
@@ -93,7 +106,8 @@ s_s = cell(1,n);
 %Integrate central backbone upto first disc
 vb0 = K_se^-1*Rb0'*nb0 + v_ref;
 ub0 = K_bt^-1*Rb0'*mb0;
-[pb,Rb,vb,ub,s] = RodODE_Eval(pb0,Rb0,vb0,ub0,0,d(1));
+
+[pb,Rb,vb,ub,s] = TendonODE_Eval(pb0,Rb0,vb0,ub0,0,d(1));
 
 %Extract normal to disc as z axis of backbone R matrix
 R_disc = Rb(:,:,end);
@@ -103,6 +117,22 @@ disc_normal = R_disc(:,3);
 %Calculate n,m at disc for central backbone (global)
 nb_D = R_disc*K_se*(vb(end,:)'-v_ref);
 mb_D = R_disc*K_bt*ub(end,:)';
+
+%Initialise key variables
+pid = zeros(3,n_t);
+F_tendon = zeros(3,n_t);
+L_tendon = zeros(3,n_t);
+
+%Iterate through each tendon to calculate boundary force/moment
+for i=1:n_t
+    pid(:,i) = R_disc*(hat(ub(end,:)')*r_t(:,i)+vb(end,:)');
+    F_tendon(:,i) = -tau(i)*pid(:,i)/norm(pid(:,i));
+    L_tendon(:,i) = -tau(i)*hat(R_disc*r_t(:,i))*pid(:,i)/norm(pid(:,i));
+end
+
+%Sum force/moments
+F_disc = sum(F_tendon,2);
+M_disc = sum(L_tendon,2);
 
 %Initialise constraint/error variables
 pos_D = zeros(3,n);
@@ -114,6 +144,7 @@ E1 = zeros(2,n);
 E2 = zeros(2,n);
 vs0 = zeros(3,n);
 us0 = zeros(3,n);
+
 
 %Integrate secondary rods until they intersect first disc
 for i=1:n
@@ -162,7 +193,8 @@ E4 = mD_sum + cross(p_disc',(-nb_Dguess + nb_D - F_disc)) - mb_Dguess + mb_D - M
 %Integrate central backbone from first disc to end effector
 vbD = K_se^-1*Rb(:,:,end)'*nb_Dguess + v_ref;
 ubD = K_bt^-1*Rb(:,:,end)'*mb_Dguess;
-[pb_end,Rb_end,vb_end,ub_end,s_L] = RodODE_Eval(pb(end,:)',Rb(:,:,end),vbD,ubD,d(1),d(2));
+
+[pb_end,Rb_end,vb_end,ub_end,s_L] = TendonODE_Eval(pb(end,:)',Rb(:,:,end),vbD,ubD,d(1),d(2));
 
 %Concatenate s,p,R,v,u parameters 
 s = [s;s_L(2:end)];
@@ -195,6 +227,7 @@ for i=1:n
     %Integrate secondary rods from first disc to end effector 
     vsD(:,i) = K_se^-1*Rs{i}(:,:,end)'*ns_Dguess(:,i) + v_ref;
     usD(:,i) = K_bt^-1*Rs{i}(:,:,end)'*ms_Dguess(:,i);
+    
     [ps_L,Rs_L,vs_L,us_L,s_c] = RodODE_Eval(ps{i}(end,:)',Rs{i}(:,:,end),vsD(:,i),usD(:,i),s_disc(i),d(2)); 
     
     %Concatenate s,p,R,v,u parameters 

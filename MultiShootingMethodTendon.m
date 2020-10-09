@@ -1,4 +1,4 @@
-function [residual] = MultiShootingMethod(guess)
+function [residual] = MultiShootingMethodTendon(guess)
 %Function that evaluates Multi Backbone ODE's for input guess and returns
 %residual of position/orientation/equilibrium conditions
 
@@ -27,6 +27,11 @@ global M_end
 global F_disc
 global M_disc
 
+%Tendon parameters
+global r_t
+global n_t
+global tau
+
 %Plotting Variables
 global pb
 global ps
@@ -36,20 +41,20 @@ global disc_normal
 global end_normal
 
 %Extract v,u sections from vector
-v_guess = guess(1:30);
-u_guess = guess(31:end);
+nm_base = guess(1:30);
+nm_disc = guess(31:60);
 
 %Extract backbone values at base and disc
-vb0 = v_guess(1:3);
-ub0 = u_guess(1:3);
-vbD = v_guess(4:6);
-ubD = u_guess(4:6);
+nb0 = nm_base(1:3);
+mb0 = nm_base(4:6);
+nb_Dguess = nm_disc(1:3);
+mb_Dguess = nm_disc(4:6);
 
 %Extract v,u values at base and disc for secondary rods
-vs0 = reshape(v_guess(7:18),[3,n]);
-us0 = reshape(u_guess(7:18),[3,n]);
-vsD = reshape(v_guess(19:30),[3,n]);
-usD = reshape(u_guess(19:30),[3,n]);
+ns0 = reshape(nm_base(7:18),[3,n]);
+ms0 = reshape(nm_base(19:30),[3,n]);
+ns_Dguess = reshape(nm_disc(7:18),[3,n]);
+ms_Dguess = reshape(nm_disc(19:30),[3,n]);
 
 %Extract disc intersection values
 s_disc = guess(end-3:end);
@@ -69,7 +74,10 @@ Rs = cell(1,n);
 s_s = cell(1,n);
 
 %Integrate central backbone upto first disc
-[pb,Rb,vb,ub,s] = RodODE_Eval(pb0,Rb0,vb0,ub0,0,d(1));
+vb0 = K_se^-1*Rb0'*nb0 + v_ref;
+ub0 = K_bt^-1*Rb0'*mb0;
+
+[pb,Rb,vb,ub,s] = TendonODE_Eval(pb0,Rb0,vb0,ub0,0,d(1));
 
 %Extract normal to disc as z axis of backbone R matrix
 R_disc = Rb(:,:,end);
@@ -80,9 +88,22 @@ disc_normal = R_disc(:,3);
 nb_D = R_disc*K_se*(vb(end,:)'-v_ref);
 mb_D = R_disc*K_bt*ub(end,:)';
 
-%Calculate n,m guesses at first disc for central backbone(negative as they go into disc) (global)
-nb_Dguess = R_disc*K_se*(vbD-v_ref);
-mb_Dguess = R_disc*K_bt*ubD;
+%Initialise key variables
+pid = zeros(3,n_t);
+F_tendon = zeros(3,n_t);
+L_tendon = zeros(3,n_t);
+
+%Iterate through each tendon to calculate boundary force/moment
+for i=1:n_t
+    pid(:,i) = R_disc*(hat(ub(end,:)')*r_t(:,i)+vb(end,:)');
+    F_tendon(:,i) = -tau(i)*pid(:,i)/norm(pid(:,i));
+    L_tendon(:,i) = -tau(i)*hat(R_disc*r_t(:,i))*pid(:,i)/norm(pid(:,i));
+end
+
+%Sum force/moments
+F_disc = sum(F_tendon,2);
+M_disc = sum(L_tendon,2);
+
 
 %Initialise constraint/error variables
 pos_D = zeros(3,n);
@@ -90,16 +111,19 @@ ori_D = zeros(3,n);
 n_D = zeros(3,n);
 m_D = zeros(3,n);
 mD_sum = zeros(3,1);
-nD_guess = zeros(3,n);
-mD_guess = zeros(3,n);
 E1 = zeros(2,n);
 E2 = zeros(2,n);
 E_inter = zeros(1,n);
+vs0 = zeros(3,n);
+us0 = zeros(3,n);
 
 %Integrate secondary rods until they intersect first disc
 for i=1:n
   
     %Integrate secondary rods to first disc
+    vs0(:,i) = K_se^-1*Rs0'*ns0(:,i) + v_ref;
+    us0(:,i) = K_bt^-1*Rs0'*ms0(:,i);
+    
     [ps{i},Rs{i},vs{i},us{i},s_s{i}] = RodODE_Eval(r(:,i),Rs0,vs0(:,i),us0(:,i),0,s_disc(i));
     
     %Calculate disc intersection error
@@ -122,28 +146,28 @@ for i=1:n
     n_D(:,i) = Rs{i}(:,:,end)*K_se*(vs{i}(end,:)'-v_ref);
     m_D(:,i) = Rs{i}(:,:,end)*K_bt*us{i}(end,:)';
     
-    %Calculate n,m guesses at first disc (global)
-    nD_guess(:,i) = Rs{i}(:,:,end)*K_se*(vsD(:,i)-v_ref);
-    mD_guess(:,i) = Rs{i}(:,:,end)*K_bt*usD(:,i);
 
     %Sum moments at disc
-    mD_sum = mD_sum + cross(ps{i}(end,:)',(-nD_guess(:,i) - n_D(:,i))) - mD_guess(:,i) - m_D(:,i);
+    mD_sum = mD_sum + cross(ps{i}(end,:)',(-ns_Dguess(:,i) + n_D(:,i))) - ms_Dguess(:,i) + m_D(:,i);
 end
 
 %Sum forces exiting disc
 nd_minus = sum(n_D,2) + nb_D;
 
 %Sum forces entering disc
-nd_plus = sum(nD_guess,2) + nb_Dguess;
+nd_plus = sum(ns_Dguess,2) + nb_Dguess;
 
 %Force Equilibrium Error
-E3 = -nd_plus - nd_minus - F_disc;
+E3 = -nd_plus + nd_minus - F_disc;
 
 %Moment Equilibrium Error
-E4 = mD_sum + cross(p_disc',(-nb_Dguess - nb_D - F_disc)) - mb_Dguess - mb_D - M_disc;
+E4 = mD_sum + cross(p_disc',(-nb_Dguess + nb_D - F_disc)) - mb_Dguess + mb_D - M_disc;
 
 %Integrate central backbone from first disc to end effector
-[pb_end,Rb_end,vb_end,ub_end,s_L] = RodODE_Eval(pb(end,:)',Rb(:,:,end),vbD,ubD,d(1),d(2));
+vbD = K_se^-1*Rb(:,:,end)'*nb_Dguess + v_ref;
+ubD = K_bt^-1*Rb(:,:,end)'*mb_Dguess;
+
+[pb_end,Rb_end,vb_end,ub_end,s_L] = TendonODE_Eval(pb(end,:)',Rb(:,:,end),vbD,ubD,d(1),d(2));
 
 %Concatenate s,p,R,v,u parameters 
 s = [s;s_L(2:end)];
@@ -167,11 +191,16 @@ m_L = zeros(3,n);
 mL_sum = zeros(3,1);
 E5 = zeros(3,n);
 E6 = zeros(3,n);
+vsD = zeros(3,n);
+usD = zeros(3,n);
 
 %Integrate secondary rods from first disc to end effector
 for i=1:n
     
     %Integrate secondary rods from first disc to end effector 
+    vsD(:,i) = K_se^-1*Rs{i}(:,:,end)'*ns_Dguess(:,i) + v_ref;
+    usD(:,i) = K_bt^-1*Rs{i}(:,:,end)'*ms_Dguess(:,i);
+    
     [ps_L,Rs_L,vs_L,us_L,s_c] = RodODE_Eval(ps{i}(end,:)',Rs{i}(:,:,end),vsD(:,i),usD(:,i),s_disc(i),d(2)); 
     
     %Concatenate s,p,R,v,u parameters 
