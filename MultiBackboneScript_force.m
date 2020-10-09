@@ -54,35 +54,22 @@ M_end = [0;0;0];
 F_disc = [0;0;0];
 M_disc = [0;0;0];
 
-%Set initial v,u values for all rods
-n_init = [0;0;0];
-m_init = [0;0;0];
+%Set initial n,m values for all rods
+nm_base = zeros(30,1);
+nm_disc = zeros(30,1);
 
 %% /////// Initialise Model Variables //////////
-%Initial n values are [0;0;0] for all rods at all discs
-n_total = repmat(n_init,10,1);
-
-%Initial m values are [0;0;0] for all rods at all discs
-m_total = repmat(m_init,10,1);
-
-%Create initial guess vector (60 elements)
-guess = [n_total;m_total];
-
-%Extract v,u sections from vector
-n_guess = guess(1:30);
-m_guess = guess(31:end);
-
 %Extract backbone values at base and disc
-nb0 = n_guess(1:3);
-mb0 = m_guess(1:3);
-nb_Dguess = n_guess(4:6);
-mb_Dguess = m_guess(4:6);
+nb0 = nm_base(1:3);
+mb0 = nm_base(4:6);
+nb_Dguess = nm_disc(1:3);
+mb_Dguess = nm_disc(4:6);
 
 %Extract v,u values at base and disc for secondary rods
-ns0 = reshape(n_guess(7:18),[3,n]);
-ms0 = reshape(m_guess(7:18),[3,n]);
-ns_Dguess = reshape(n_guess(19:30),[3,n]);
-ms_Dguess = reshape(m_guess(19:30),[3,n]);
+ns0 = reshape(nm_base(7:18),[3,n]);
+ms0 = reshape(nm_base(19:30),[3,n]);
+ns_Dguess = reshape(nm_disc(7:18),[3,n]);
+ms_Dguess = reshape(nm_disc(19:30),[3,n]);
 
 %Define initial conditions for central backbone
 pb0 = [0;0;0];
@@ -146,12 +133,12 @@ for i=1:n
     %Orientation Error
     E2(:,i) = ori_D(1:2,i);
     
-    %Calculate n,m at disc (negative is included as they enter disc)(global)
+    %Calculate n,m at disc (global)
     n_D(:,i) = ns{i}(end,:)';
     m_D(:,i) = ms{i}(end,:)';
     
     %Sum moments at disc
-    mD_sum = mD_sum + cross(ps{i}(end,:)',(ns_Dguess(:,i) + n_D(:,i))) + ms_Dguess(:,i) + m_D(:,i);
+    mD_sum = mD_sum + cross(ps{i}(end,:)',(-ns_Dguess(:,i) + n_D(:,i))) - ms_Dguess(:,i) + m_D(:,i);
 end
 
 %Sum forces exiting disc
@@ -161,10 +148,10 @@ nd_minus = sum(n_D,2) + nb_D;
 nd_plus = sum(ns_Dguess,2) + nb_Dguess;
 
 %Force Equilibrium Error
-E3 = nd_plus + nd_minus - F_disc;
+E3 = -nd_plus + nd_minus - F_disc;
 
 %Moment Equilibrium Error
-E4 = mD_sum + cross(p_disc',(nb_Dguess + nb_D - F_disc)) + mb_Dguess + mb_D - M_disc;
+E4 = mD_sum + cross(p_disc',(-nb_Dguess + nb_D - F_disc)) - mb_Dguess + mb_D - M_disc;
 
 %% //////////// First Disc to End Effector ////////////
 %Integrate central backbone from first disc to end effector
@@ -206,7 +193,7 @@ for i=1:n
     ns{i} = [ns{i}; ns_L(2:end,:)];
     ms{i} = [ms{i}; ms_L(2:end,:)];
     
-    %Calcualte n,m values at end effector for secondary rod (global)
+    %Calculate n,m values at end effector for secondary rod (global)
     n_L(:,i) = ns{i}(end,:)';
     m_L(:,i) = ms{i}(end,:)';
     

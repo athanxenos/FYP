@@ -65,23 +65,16 @@ v_ref = [0;0;1];
 
 %% /////////// Model Variables ////////////
 %Input force/moments at disc and end effector 
-F_end = [0.5;0;0];
-M_end = [0;0;0];
+F_end = [0;0;0];
+M_end = [0.2;0;0];
 F_disc = [0;0;0];
-M_disc = [0;0;0];
-
-%Set initial v,u values for all rods
-n_init = [0;0;0];
-m_init = [0;0;0];
+M_disc = [-0.2;0;0];
 
 %% /////// Initialise Model Variables //////////
 %Initial n values are [0;0;0] for all rods at all discs
 nm_base = zeros(30,1);
 
 %Initial m values are [0;0;0] for all rods at all discs
-%mz and nz compenents at disc are 0 for secondary rods as they are free
-%to slide through disc
-%nm_disc = zeros(22*nd,1);
 nm_disc = zeros(30,1);
 
 %Initial disc intersection based on straight position

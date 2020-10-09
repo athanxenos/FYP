@@ -75,17 +75,17 @@ v_init = [0;0;1];
 u_init = [0;0;0];
 
 %% /////// Initialise Model Variables //////////
-%Initial V values are [0;0;1] for all rods at all discs
-v_total = repmat(v_init,10,1);
+%Initial n values are [0;0;0] for all rods at all discs
+nm_base = zeros(30,1);
 
-%Initial U values are [0;0;0] for all rods at all discs
-u_total = repmat(u_init,10,1);
+%Initial m values are [0;0;0] for all rods at all discs
+nm_disc = zeros(30,1);
 
 %Initial disc intersection based on straight position
 s_disc = ones(4,1)*d(1);
 
-%Create initial guess vector (64 elements)
-guess = [v_total;u_total;s_disc];
+%Create initial guess vector (56 elements)
+guess = [nm_base;nm_disc;s_disc];
 
 %% ///////// Solve Optimisation Problem //////////
 %Set fsolve options
