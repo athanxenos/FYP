@@ -56,8 +56,8 @@ n = 4; %Number of secondary backbones
 r = [0 -rad_s 0 rad_s; rad_s 0 -rad_s 0; 0 0 0 0]; %Radial coordinate profile of secondary backbones through disc (local frame)
 
 %Disc Parameters
-nd = 2; %Number of discs (not including base,including end effector)
-d = linspace(L/nd,L,nd);  %Disc locations on central backbone
+nd = 1; %Number of discs (not including base or end effector)
+d = linspace(L/(nd+1),L,(nd+1));  %Disc locations on central backbone
 
 %Reference Parameters
 %Linear rate of change of frame in reference state
@@ -65,9 +65,9 @@ v_ref = [0;0;1];
 
 %% /////////// Model Variables ////////////
 %Input force/moments at disc and end effector 
-F_end = [0;0;0];
+F_end = [0.5;0;0];
 M_end = [0;0;0];
-F_disc = [0.5;0;0];
+F_disc = [0;0;0];
 M_disc = [0;0;0];
 
 %Set initial v,u values for all rods
@@ -76,20 +76,23 @@ m_init = [0;0;0];
 
 %% /////// Initialise Model Variables //////////
 %Initial n values are [0;0;0] for all rods at all discs
-n_total = repmat(n_init,10,1);
+nm_base = zeros(30,1);
 
 %Initial m values are [0;0;0] for all rods at all discs
-m_total = repmat(m_init,10,1);
+%mz and nz compenents at disc are 0 for secondary rods as they are free
+%to slide through disc
+%nm_disc = zeros(22*nd,1);
+nm_disc = zeros(30,1);
 
 %Initial disc intersection based on straight position
 s_disc = ones(4,1)*d(1);
 
-%Create initial guess vector (64 elements)
-guess = [n_total;m_total;s_disc];
+%Create initial guess vector (56 elements)
+guess = [nm_base;nm_disc;s_disc];
 
 %% ///////// Solve Optimisation Problem //////////
 %Set fsolve options
-options = optimoptions(@fsolve,'Algorithm','levenberg-marquardt','Display','iter-detailed','MaxFunctionEvaluations',100000,'MaxIterations',1000);
+options = optimoptions(@fsolve,'Display','iter-detailed','MaxFunctionEvaluations',100000,'MaxIterations',1000);
 
 %Solve optimisation problem with fsolve
 [final_guess,fval,exitflag,output] = fsolve(@MultiShootingMethod_force,guess,options);

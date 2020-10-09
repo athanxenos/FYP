@@ -31,8 +31,8 @@ global disc_normal
 global end_normal
 
 %Extract v,u sections from vector
-nm_base = guess(1:30);
-nm_disc = guess(31:60);
+nm_base = guess(1:26);
+nm_disc = guess(27:52);
 
 %Extract backbone values at base and disc
 nb0 = nm_base(1:3);
@@ -42,12 +42,14 @@ mb_Dguess = nm_disc(4:6);
 
 %Extract v,u values at base and disc for secondary rods
 ns0 = reshape(nm_base(7:18),[3,n]);
-ms0 = reshape(nm_base(19:30),[3,n]);
+ms0 = reshape(nm_base(19:26),[2,n]);
+ms0
 ns_Dguess = reshape(nm_disc(7:18),[3,n]);
-ms_Dguess = reshape(nm_disc(19:30),[4,n]);
+ms_Dguess = reshape(nm_disc(19:26),[2,n]);
 % ns_Dguess = reshape(nm_disc(7:14),[2,n]);
 % ns_Dguess(3,:) = zeros(1,n);
 % ms_Dguess = reshape(nm_disc(15:22),[2,n]);
+ ms_Dguess(3,:) = zeros(1,n);
 
 %Extract disc intersection values
 s_disc = guess(end-3:end);
