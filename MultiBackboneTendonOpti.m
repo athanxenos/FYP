@@ -81,7 +81,7 @@ F_end = [0;0;0];
 M_end = [0;0;0];
 
 %Input tension
-tau = [0 1 0 0]; %Tension for each tendon (N)
+tau = [10 0 0 0]; %Tension for each tendon (N)
 
 %% /////// Initialise Model Variables //////////
 %Initial n values are [0;0;0] for all rods at all discs
@@ -98,7 +98,7 @@ guess = [nm_base;nm_disc;s_disc];
 
 %% ///////// Solve Optimisation Problem //////////
 %Set fsolve options
-options = optimoptions(@fsolve,'Algorithm','levenberg-marquardt','Display','iter-detailed','MaxFunctionEvaluations',100000,'MaxIterations',1000);
+options = optimoptions(@fsolve,'Algorithm','levenberg-marquardt','Display','iter-detailed','MaxFunctionEvaluations',100000,'MaxIterations',10000);
 
 %Solve optimisation problem with fsolve
 [final_guess,fval,exitflag,output] = fsolve(@MultiShootingMethodTendon,guess,options);

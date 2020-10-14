@@ -167,7 +167,7 @@ E4 = mD_sum + cross(p_disc',(-nb_Dguess + nb_D - F_disc)) - mb_Dguess + mb_D - M
 vbD = K_se^-1*Rb(:,:,end)'*nb_Dguess + v_ref;
 ubD = K_bt^-1*Rb(:,:,end)'*mb_Dguess;
 
-[pb_end,Rb_end,vb_end,ub_end,s_L] = TendonODE_Eval(pb(end,:)',Rb(:,:,end),vbD,ubD,d(1),d(2));
+[pb_end,Rb_end,vb_end,ub_end,s_L] = RodODE_Eval(pb(end,:)',Rb(:,:,end),vbD,ubD,d(1),d(2));
 
 %Concatenate s,p,R,v,u parameters 
 s = [s;s_L(2:end)];

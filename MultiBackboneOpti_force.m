@@ -66,9 +66,9 @@ v_ref = [0;0;1];
 %% /////////// Model Variables ////////////
 %Input force/moments at disc and end effector 
 F_end = [0;0;0];
-M_end = [0.2;0;0];
-F_disc = [0;0;0];
-M_disc = [-0.2;0;0];
+M_end = [0;0;0];
+F_disc = [0;0;-10];
+M_disc = [-0.1;0;0];
 
 %% /////// Initialise Model Variables //////////
 %Initial n values are [0;0;0] for all rods at all discs
@@ -85,7 +85,7 @@ guess = [nm_base;nm_disc;s_disc];
 
 %% ///////// Solve Optimisation Problem //////////
 %Set fsolve options
-options = optimoptions(@fsolve,'Display','iter-detailed','MaxFunctionEvaluations',100000,'MaxIterations',1000);
+options = optimoptions(@fsolve,'Display','iter-detailed','MaxFunctionEvaluations',100000,'MaxIterations',10000);
 
 %Solve optimisation problem with fsolve
 [final_guess,fval,exitflag,output] = fsolve(@MultiShootingMethod_force,guess,options);
