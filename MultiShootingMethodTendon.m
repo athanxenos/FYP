@@ -68,11 +68,12 @@ Rs0 = eye(3);
 
 %Initialise cells for secondary backbones
 ps = cell(1,n);
-us = cell(1,n);
-vs = cell(1,n);
+ms = cell(1,n);
+ns = cell(1,n);
 Rs = cell(1,n);
 s_s = cell(1,n);
 
+%% /////////// Base to First Disc /////////////
 %Integrate central backbone upto first disc
 vb0 = K_se^-1*Rb0'*nb0 + v_ref;
 ub0 = K_bt^-1*Rb0'*mb0;
@@ -114,17 +115,17 @@ mD_sum = zeros(3,1);
 E1 = zeros(2,n);
 E2 = zeros(2,n);
 E_inter = zeros(1,n);
-vs0 = zeros(3,n);
-us0 = zeros(3,n);
+%vs0 = zeros(3,n);
+%us0 = zeros(3,n);
 
 %Integrate secondary rods until they intersect first disc
 for i=1:n
   
     %Integrate secondary rods to first disc
-    vs0(:,i) = K_se^-1*Rs0'*ns0(:,i) + v_ref;
-    us0(:,i) = K_bt^-1*Rs0'*ms0(:,i);
+    %vs0(:,i) = K_se^-1*Rs0'*ns0(:,i) + v_ref;
+    %us0(:,i) = K_bt^-1*Rs0'*ms0(:,i);
     
-    [ps{i},Rs{i},vs{i},us{i},s_s{i}] = RodODE_Eval(r(:,i),Rs0,vs0(:,i),us0(:,i),0,s_disc(i));
+    [ps{i},Rs{i},ns{i},ms{i},s_s{i}] = RodODE_Eval_force(r(:,i),Rs0,ns0(:,i),ms0(:,i),0,s_disc(i));
     
     %Calculate disc intersection error
     intersect = R_disc.'*(ps{i}(end,:)-p_disc)';
@@ -143,9 +144,10 @@ for i=1:n
     E2(:,i) = ori_D(1:2,i);
     
     %Calculate n,m at disc (negative is included as they enter disc)(global)
-    n_D(:,i) = Rs{i}(:,:,end)*K_se*(vs{i}(end,:)'-v_ref);
-    m_D(:,i) = Rs{i}(:,:,end)*K_bt*us{i}(end,:)';
-    
+    %n_D(:,i) = Rs{i}(:,:,end)*K_se*(vs{i}(end,:)'-v_ref);
+    %m_D(:,i) = Rs{i}(:,:,end)*K_bt*us{i}(end,:)';
+    n_D(:,i) = ns{i}(end,:)';
+    m_D(:,i) = ms{i}(end,:)';
 
     %Sum moments at disc
     mD_sum = mD_sum + cross(ps{i}(end,:)',(-ns_Dguess(:,i) + n_D(:,i))) - ms_Dguess(:,i) + m_D(:,i);
@@ -163,18 +165,19 @@ E3 = -nd_plus + nd_minus - F_disc;
 %Moment Equilibrium Error
 E4 = mD_sum + cross(p_disc',(-nb_Dguess + nb_D - F_disc)) - mb_Dguess + mb_D - M_disc;
 
+%% //////////// First Disc to End Effector ////////////
 %Integrate central backbone from first disc to end effector
-vbD = K_se^-1*Rb(:,:,end)'*nb_Dguess + v_ref;
-ubD = K_bt^-1*Rb(:,:,end)'*mb_Dguess;
+%vbD = K_se^-1*Rb(:,:,end)'*nb_Dguess + v_ref;
+%ubD = K_bt^-1*Rb(:,:,end)'*mb_Dguess;
 
-[pb_end,Rb_end,vb_end,ub_end,s_L] = RodODE_Eval(pb(end,:)',Rb(:,:,end),vbD,ubD,d(1),d(2));
+[pb_end,Rb_end,nb,mb,s_L] = RodODE_Eval_force(pb(end,:)',Rb(:,:,end),nb_Dguess,mb_Dguess,d(1),d(2));
 
 %Concatenate s,p,R,v,u parameters 
 s = [s;s_L(2:end)];
 pb = [pb;pb_end(2:end,:)];
 Rb = cat(3,Rb,Rb_end(:,:,2:end));
-vb = [vb;vb_end(2:end,:)];
-ub = [ub;ub_end(2:end,:)];
+%vb = [vb;vb_end(2:end,:)];
+%ub = [ub;ub_end(2:end,:)];
 
 %Find end effector position/orientation
 pb_L = pb(end,:)';       
@@ -182,8 +185,10 @@ Rb_L =  Rb(:,:,end);
 end_normal = Rb_L(:,3);
 
 %Calculate n,m at end effector for central backbone (global)
-nb_L = Rb_L*K_se*(vb(end,:)'-v_ref);
-mb_L = Rb_L*K_bt*ub(end,:)';
+%nb_L = Rb_L*K_se*(vb(end,:)'-v_ref);
+%mb_L = Rb_L*K_bt*ub(end,:)';
+nb_L = nb(end,:)';
+mb_L = mb(end,:)';
 
 %Initialise constraint/error variables
 n_L = zeros(3,n);
@@ -191,28 +196,30 @@ m_L = zeros(3,n);
 mL_sum = zeros(3,1);
 E5 = zeros(3,n);
 E6 = zeros(3,n);
-vsD = zeros(3,n);
-usD = zeros(3,n);
+%vsD = zeros(3,n);
+%usD = zeros(3,n);
 
 %Integrate secondary rods from first disc to end effector
 for i=1:n
     
     %Integrate secondary rods from first disc to end effector 
-    vsD(:,i) = K_se^-1*Rs{i}(:,:,end)'*ns_Dguess(:,i) + v_ref;
-    usD(:,i) = K_bt^-1*Rs{i}(:,:,end)'*ms_Dguess(:,i);
+    %vsD(:,i) = K_se^-1*Rs{i}(:,:,end)'*ns_Dguess(:,i) + v_ref;
+    %usD(:,i) = K_bt^-1*Rs{i}(:,:,end)'*ms_Dguess(:,i);
     
-    [ps_L,Rs_L,vs_L,us_L,s_c] = RodODE_Eval(ps{i}(end,:)',Rs{i}(:,:,end),vsD(:,i),usD(:,i),s_disc(i),d(2)); 
+    [ps_L,Rs_L,ns_L,ms_L,s_c] = RodODE_Eval_force(ps{i}(end,:)',Rs{i}(:,:,end),ns_Dguess(:,i),ms_Dguess(:,i),s_disc(i),d(2)); 
     
     %Concatenate s,p,R,v,u parameters 
     s_s{i} = [s_s{i};s_c(2:end)];
     ps{i} = [ps{i}; ps_L(2:end,:)]; 
     Rs{i} = cat(3,Rs{i},Rs_L(:,:,2:end));
-    vs{i} = [vs{i}; vs_L(2:end,:)];
-    us{i} = [us{i}; us_L(2:end,:)];
+    ns{i} = [ns{i}; ns_L(2:end,:)];
+    ms{i} = [ms{i}; ms_L(2:end,:)];
     
     %Calcualte n,m values at end effector for secondary rod (global)
-    n_L(:,i) = Rs{i}(:,:,end)*K_se*(vs{i}(end,:)'-v_ref);
-    m_L(:,i) = Rs{i}(:,:,end)*K_bt*us{i}(end,:)';
+    %n_L(:,i) = Rs{i}(:,:,end)*K_se*(vs{i}(end,:)'-v_ref);
+    %m_L(:,i) = Rs{i}(:,:,end)*K_bt*us{i}(end,:)';
+    n_L(:,i) = ns{i}(end,:)';
+    m_L(:,i) = ms{i}(end,:)';
     
     %Sum moments at end effector
     mL_sum = mL_sum + cross(ps{i}(end,:)',n_L(:,i)) + m_L(:,i);

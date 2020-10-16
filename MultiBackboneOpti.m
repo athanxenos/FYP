@@ -51,7 +51,7 @@ K_se = diag([GY*Area GY*Area EY*Area]); %Shear/extension stiffness matrix
 K_bt = diag([EY*Ixx EY*Iyy GY*Izz]); %Bending/torsion stiffness matrix
 
 %Secondary Rod Parameters
-rad_s = 0.015; %Radial location of secondary rods from central backbone (m)(approx 15mm)
+rad_s = 0.01; %Radial location of secondary rods from central backbone (m)(approx 10mm)
 n = 4; %Number of secondary backbones
 r = [0 -rad_s 0 rad_s; rad_s 0 -rad_s 0; 0 0 0 0]; %Radial coordinate profile of secondary backbones through disc (local frame)
 
@@ -66,9 +66,9 @@ v_ref = [0;0;1];
 %% /////////// Model Variables ////////////
 %Input force/moments at disc and end effector 
 F_end = [0;0;0];
-M_end = [0;0;0];
-F_disc = [0;0;-10];
-M_disc = [-0.1;0;0];
+M_end = [0.2;0;0];
+F_disc = [0;0;0];
+M_disc = [-0.2;0;0];
 
 %% /////// Initialise Model Variables //////////
 %Initial n values are [0;0;0] for all rods at all discs
@@ -88,7 +88,7 @@ guess = [nm_base;nm_disc;s_disc];
 options = optimoptions(@fsolve,'Display','iter-detailed','MaxFunctionEvaluations',100000,'MaxIterations',10000);
 
 %Solve optimisation problem with fsolve
-[final_guess,fval,exitflag,output] = fsolve(@MultiShootingMethod_force,guess,options);
+[final_guess,fval,exitflag,output] = fsolve(@MultiShootingMethod,guess,options);
 
 %% /////////// Plot Solution //////////////
 %Calculate arclength to check solution feasibility

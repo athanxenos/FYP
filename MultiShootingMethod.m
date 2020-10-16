@@ -1,4 +1,4 @@
-function [residual] = MultiShootingMethod_force(guess)
+function [residual] = MultiShootingMethod(guess)
 %Function that evaluates Multi Backbone ODE's for input guess and returns
 %residual of position/orientation/equilibrium conditions
 

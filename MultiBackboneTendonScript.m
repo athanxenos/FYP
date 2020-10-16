@@ -65,7 +65,7 @@ F_end = [0;0;0];
 M_end = [0;0;0];
 
 %Input tension
-tau = [0 0 0 0]; %Tension for each tendon (N)
+tau = [10 0 0 0]; %Tension for each tendon (N)
 
 %Set initial n,m values for all rods
 nm_base = zeros(30,1);
