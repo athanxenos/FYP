@@ -68,7 +68,7 @@ v_ref = [0;0;1];
 F_end = [0;0;0];
 M_end = [0;0;0];
 F_disc = [0;0;0];
-M_disc = [-0.2;0;0];
+M_disc = [0;0;0];
 
 %% /////// Initialise Model Variables //////////
 %Initial n values are [0;0;0] for all rods at all discs
