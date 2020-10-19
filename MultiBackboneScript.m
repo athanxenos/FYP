@@ -80,7 +80,7 @@ Rb0 = eye(3);
 
 %Initialise variables for secondary backbones
 Rs0 = eye(3);
-ps0 =r;
+ps0 = r;
 
 %Initialise cells for secondary backbones
 ps = cell(1,n);
@@ -148,11 +148,11 @@ for j=1:nd
     %Integrate secondary rods until they intersect first disc
     for i=1:n
 
-        ns0 = guess(7+30*(j-1)+3*(n-1):9+30*(j-1)+3*(n-1));
-        ms0 = guess(19+30*(j-1)+3*(n-1):21+30*(j-1)+3*(n-1));
+        ns0 = guess(7+30*(j-1)+3*(i-1):9+30*(j-1)+3*(i-1));
+        ms0 = guess(19+30*(j-1)+3*(i-1):21+30*(j-1)+3*(i-1));
         
-        ns_Dguess = guess(37+30*(j-1)+3*(n-1):39+30*(j-1)+3*(n-1));
-        ms_Dguess = guess(49+30*(j-1)+3*(n-1):51+30*(j-1)+3*(n-1));
+        ns_Dguess = guess(37+30*(j-1)+3*(i-1):39+30*(j-1)+3*(i-1));
+        ms_Dguess = guess(49+30*(j-1)+3*(i-1):51+30*(j-1)+3*(i-1));
         
         %Initialise disc intersection arclengths
         s_disc(j+1,:) = ones(1,4)*d(j+1);
@@ -241,8 +241,8 @@ E6 = zeros(3,n);
 %Integrate secondary rods from first disc to end effector
 for i=1:n
     
-    ns_Dguess = guess(7+30*nd+3*(n-1):9+30*nd+3*(n-1));
-    ms_Dguess = guess(19+30*nd+3*(n-1):21+30*nd+3*(n-1));
+    ns_Dguess = guess(7+30*nd+3*(i-1):9+30*nd+3*(i-1));
+    ms_Dguess = guess(19+30*nd+3*(i-1):21+30*nd+3*(i-1));
         
     %Integrate secondary rods from first disc to end effector 
     [ps_L,Rs_L,ns_L,ms_L,s_c] = RodODE_Eval_force(ps{i}(end,:)',Rs{i}(:,:,end),ns_Dguess,ms_Dguess,s_disc(end,i),d(end)); 

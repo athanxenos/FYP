@@ -1,6 +1,7 @@
 %Cosserat Model Script based on 2017 paper
 %Model multiple backbones with intermediate discs with optimisation
 clear variables
+clear global
 close all
 clc 
 
@@ -13,6 +14,8 @@ global v_ref
 %Model Parameters
 global d
 global n
+global nd
+global n_mid
 global r
 
 %Input Variables
@@ -57,7 +60,8 @@ r = [0 -rad_s 0 rad_s; rad_s 0 -rad_s 0; 0 0 0 0]; %Radial coordinate profile of
 
 %Disc Parameters
 nd = 1; %Number of discs (not including base or end effector)
-d = linspace(L/(nd+1),L,(nd+1));  %Disc locations on central backbone
+n_mid = 1;
+d = linspace(0,L,nd+2);  %Disc locations on central backbone
 
 %Reference Parameters
 %Linear rate of change of frame in reference state
@@ -65,23 +69,20 @@ v_ref = [0;0;1];
 
 %% /////////// Model Variables ////////////
 %Input force/moments at disc and end effector 
-F_end = [0;0;0];
+F_end = [0.25;0;0];
 M_end = [0;0;0];
 F_disc = [0;0;0];
 M_disc = [0;0;0];
 
 %% /////// Initialise Model Variables //////////
-%Initial n values are [0;0;0] for all rods at all discs
-nm_base = zeros(30,1);
 
-%Initial m values are [0;0;0] for all rods at all discs
-nm_disc = zeros(30,1);
+nm_guess = zeros((nd+1)*30,1);
 
 %Initial disc intersection based on straight position
-s_disc = ones(4,1)*d(1);
+s_disc = repmat(d(2:end-1),4,1);
 
 %Create initial guess vector (56 elements)
-guess = [nm_base;nm_disc;s_disc];
+guess = [nm_guess;s_disc(:)];
 
 %% ///////// Solve Optimisation Problem //////////
 %Set fsolve options
@@ -103,8 +104,12 @@ for i = 1:n
     plot3(ps{i}(:,1),ps{i}(:,2),ps{i}(:,3),'r');
 end
 
+
 %Plot first disc and end effector
-plotCircle3D(p_disc,disc_normal',rad_s)
+for i =1:nd
+    plotCircle3D(p_disc(i+1,:),disc_normal(i,:),rad_s)
+end
+
 plotCircle3D(pb_L',end_normal',rad_s)
 
 %Graph labels
