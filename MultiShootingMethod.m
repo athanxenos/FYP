@@ -190,7 +190,6 @@ E7 = sum(n_L,2) + nb_L - F_end;
 E8 = mL_sum + cross(pb_L,nb_L) + mb_L - cross(pb_L,F_end) - M_end;
 
 %Combine Residual Vector
-residual = [E_inter(:);E1(:);E2(:);E3;E4;E5(:);E6(:);E7;E8];
-
+residual = [E1(:);E2(:);E3;E4;E_inter(:);E5(:);E6(:);E7;E8];
 end
 
