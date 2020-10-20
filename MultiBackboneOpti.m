@@ -36,7 +36,7 @@ global end_normal
 tic
 %% //////////// Model Parameters ////////////
 %Rod Parameters
-L = 0.25; %Arclength of all rods (m)
+L = 0.285; %Arclength of all rods (m)
 rad = 0.0005; %Radius of all rods (m)(approx 0.5mm)
 Area = pi*rad^2; %Area of cross section (m^2)
 
@@ -54,13 +54,13 @@ K_se = diag([GY*Area GY*Area EY*Area]); %Shear/extension stiffness matrix
 K_bt = diag([EY*Ixx EY*Iyy GY*Izz]); %Bending/torsion stiffness matrix
 
 %Secondary Rod Parameters
-rad_s = 0.01; %Radial location of secondary rods from central backbone (m)(approx 10mm)
+rad_s = 0.015; %Radial location of secondary rods from central backbone (m)(approx 10mm)
 n = 4; %Number of secondary backbones
 r = [0 -rad_s 0 rad_s; rad_s 0 -rad_s 0; 0 0 0 0]; %Radial coordinate profile of secondary backbones through disc (local frame)
 
 %Disc Parameters
-nd = 1; %Number of discs (not including base or end effector)
-n_mid = 1;
+nd = 3; %Number of discs (not including base or end effector)
+n_mid = 2;
 d = linspace(0,L,nd+2);  %Disc locations on central backbone
 
 %Reference Parameters
@@ -69,10 +69,10 @@ v_ref = [0;0;1];
 
 %% /////////// Model Variables ////////////
 %Input force/moments at disc and end effector 
-F_end = [0.25;0;0];
+F_end = [0;0;0];
 M_end = [0;0;0];
 F_disc = [0;0;0];
-M_disc = [0;0;0];
+M_disc = [-0.4;0;0];
 
 %% /////// Initialise Model Variables //////////
 
@@ -86,7 +86,7 @@ guess = [nm_guess;s_disc(:)];
 
 %% ///////// Solve Optimisation Problem //////////
 %Set fsolve options
-options = optimoptions(@fsolve,'Display','iter-detailed','MaxFunctionEvaluations',100000,'MaxIterations',10000);
+options = optimoptions(@fsolve,'Display','iter-detailed','MaxFunctionEvaluations',1000000,'MaxIterations',10000);
 
 %Solve optimisation problem with fsolve
 [final_guess,fval,exitflag,output] = fsolve(@MultiShootingMethod,guess,options);
