@@ -59,8 +59,8 @@ n = 4; %Number of secondary backbones
 r = [0 -rad_s 0 rad_s; rad_s 0 -rad_s 0; 0 0 0 0]; %Radial coordinate profile of secondary backbones through disc (local frame)
 
 %Disc Parameters
-nd = 3; %Number of discs (not including base or end effector)
-n_mid = 2;
+nd = 7; %Number of discs (not including base or end effector)
+n_mid = 4;
 d = linspace(0,L,nd+2);  %Disc locations on central backbone
 
 %Reference Parameters
@@ -70,9 +70,9 @@ v_ref = [0;0;1];
 %% /////////// Model Variables ////////////
 %Input force/moments at disc and end effector 
 F_end = [0;0;0];
-M_end = [0;0;0];
+M_end = [0.4;0;0];
 F_disc = [0;0;0];
-M_disc = [-0.4;0;0];
+M_disc = [-0.8;0;0];
 
 %% /////// Initialise Model Variables //////////
 
@@ -91,6 +91,8 @@ options = optimoptions(@fsolve,'Display','iter-detailed','MaxFunctionEvaluations
 %Solve optimisation problem with fsolve
 [final_guess,fval,exitflag,output] = fsolve(@MultiShootingMethod,guess,options);
 
+%Run one iteration of code
+%[residual] = MultiShootingMethod(guess)
 %% /////////// Plot Solution //////////////
 %Calculate arclength to check solution feasibility
 arc = arclength(pb(:,1),pb(:,2),pb(:,3));
@@ -117,8 +119,9 @@ xlabel('x');
 ylabel('y');
 zlabel('z');
 grid on
-axis([-L,L,-L,L,-L,L]);
-title(['Arclength is ',num2str(arc)])
+axis([-L,L,-L,L,0,L]);
+%title(['Arclength is ',num2str(arc)])
+title(['M disc is ',num2str(M_disc(1)),'Nm, M end is ',num2str(M_end(1)),'Nm'])
 
 %Time stats
 time = toc;
