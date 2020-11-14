@@ -1,5 +1,6 @@
-%Cosserat Model Script based on 2017 paper
+%Cosserat Model Script based on 2017 paper by Orekhov
 %Model multiple backbones with intermediate discs with optimisation
+%Written by Athan Xenos
 clear variables
 clear global
 close all
@@ -31,8 +32,6 @@ global p_disc
 global pb_L
 global disc_normal
 global end_normal
-
-%Start timer
 tic
 %% //////////// Model Parameters ////////////
 %Rod Parameters
@@ -70,12 +69,11 @@ v_ref = [0;0;1];
 %% /////////// Model Variables ////////////
 %Input force/moments at disc and end effector 
 F_end = [0;0;0];
-M_end = [0.2;0;0];
+M_end = [0.4;0;0];
 F_disc = [0;0;0];
-M_disc = [-0.4;0;0];
+M_disc = [-0.8;0;0];
 
 %% /////// Initialise Model Variables //////////
-
 nm_guess = zeros((nd+1)*30,1);
 
 %Initial disc intersection based on straight position
@@ -86,13 +84,11 @@ guess = [nm_guess;s_disc(:)];
 
 %% ///////// Solve Optimisation Problem //////////
 %Set fsolve options
-options = optimoptions(@fsolve,'Display','iter-detailed','MaxFunctionEvaluations',1000000,'MaxIterations',10000);
+options = optimoptions(@fsolve,'Algorithm','levenberg-marquardt','Display','iter-detailed','MaxFunctionEvaluations',1000000,'MaxIterations',10000);
 
 %Solve optimisation problem with fsolve
 [final_guess,fval,exitflag,output] = fsolve(@MultiShootingMethod,guess,options);
 
-%Run one iteration of code
-%[residual] = MultiShootingMethod(guess)
 %% /////////// Plot Solution //////////////
 %Calculate arclength to check solution feasibility
 arc = arclength(pb(:,1),pb(:,2),pb(:,3));
@@ -106,7 +102,6 @@ for i = 1:n
     plot3(ps{i}(:,1),ps{i}(:,2),ps{i}(:,3),'r');
 end
 
-
 %Plot first disc and end effector
 for i =1:nd
     plotCircle3D(p_disc(i+1,:),disc_normal(i,:),rad_s)
@@ -115,13 +110,12 @@ end
 plotCircle3D(pb_L',end_normal',rad_s)
 
 %Graph labels
-xlabel('x');
-ylabel('y');
-zlabel('z');
+xlabel('x (m)');
+ylabel('y (m)');
+zlabel('z (m)');
 grid on
-axis([-L,L,-L,L,0,L]);
-%title(['Arclength is ',num2str(arc)])
-title(['M disc is ',num2str(M_disc(1)),'Nm, M end is ',num2str(M_end(1)),'Nm'])
+axis([-0.3,0.3,-rad_s,0.3,0,0.3]);
+title(['Moment at Middle Disc is ',num2str(M_disc(1)),'Nm, Moment at End Effector is ',num2str(M_end(1)),'Nm'])
 
 %Time stats
 time = toc;

@@ -70,9 +70,9 @@ for i=1:n
 end
 
 %Plot solution
-xlabel('x');
-ylabel('y');
-zlabel('z');
+xlabel('x (m)');
+ylabel('y (m)');
+zlabel('z (m)');
 grid on
-axis([-L,L,-L,L,-L,L]);
-title('Robot poses with varying tension (0-10N)')
+axis([-L,L,0,L,0,L]);
+title('Single Backbone with varying Tension (0-10N)')

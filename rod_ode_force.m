@@ -1,5 +1,6 @@
 function [yd] = rod_ode_force(s,y)
 %Function to evaluate ODE system at one step for Cosserat Rod model
+%Written by Athan Xenos
 
 %Inputs:
 %y (p,R,n,m) - Systems variables described as state vector  

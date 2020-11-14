@@ -1,6 +1,7 @@
 function [residual] = MultiShootingMethod(guess)
 %Function that evaluates Multi Backbone ODE's for input guess and returns
 %residual of position/orientation/equilibrium conditions
+%Written by Athan Xenos
 
 %Inputs:
 % guess - 64x1 vector with initial guess for n,m,s_disc (52 length minimum)
@@ -65,8 +66,6 @@ for j =1:nd
     nb_Dguess = guess(1+30*j:3+30*j);
     mb_Dguess = guess(4+30*j:6+30*j);
     
-    
-    
     %Integrate central backbone upto first disc
     [pb_temp,Rb_temp,nb_temp,mb_temp,s_temp] = RodODE_Eval_force(p_disc(j,:)',R_disc(:,:,j),nb0,mb0,d(j),d(j+1));
     
@@ -117,7 +116,6 @@ for j =1:nd
         
         ns_Dguess(:,i) = guess(37+30*(j-1)+3*(i-1):39+30*(j-1)+3*(i-1));
         ms_Dguess(:,i) = guess(49+30*(j-1)+3*(i-1):51+30*(j-1)+3*(i-1));
-        
         
         %Integrate secondary rods to first disc
         [ps_temp,Rs_temp,ns_temp,ms_temp,s_temp] = RodODE_Eval_force(ps0(:,i),Rs0(:,:,i),ns0,ms0,s_disc(j,i),s_disc(j+1,i));
@@ -178,6 +176,7 @@ for j =1:nd
         E4 = mD_sum + cross(p_disc(j+1,:)',(-nb_Dguess + nb_D)) - mb_Dguess + mb_D;
     end
     
+    %Calculate Residual
     residual(1+26*(j-1):26+26*(j-1)) = [E1(:);E2(:);E3;E4;E_inter(:)];
     
 end

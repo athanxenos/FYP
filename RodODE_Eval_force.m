@@ -1,5 +1,6 @@
 function [p,R,n,m,s] = RodODE_Eval_force(p0,R0,n0,m0,L_start,L_finish)
 %Function that evaluates ODE's from L_start to L_finish
+%Written by Athan Xenos
 
 %Inputs:
 % p0,R0,n0,m0 - Initial state variables of rod 
