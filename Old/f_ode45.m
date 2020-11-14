@@ -1,5 +1,9 @@
 function [yd] = f_ode45(s,y)
-%Function to evaluate ODE system at one step for backbone with tendons
+%f_ode45
+%Written by Athan Xenos
+
+%Function to evaluate ODE system at one step for Cosserat Rod model
+%Tendons coupled to central backbone
 
 %Inputs:
 %Systems variables described as state vector - y (p,R,v,u)

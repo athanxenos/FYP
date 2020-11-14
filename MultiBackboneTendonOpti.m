@@ -1,5 +1,9 @@
-%Cosserat Model Script based on 2017 paper
-%Model multiple backbones with intermediate discs with optimisation
+%MultiBackboneTendonOpti
+%Written by Athan Xenos
+
+%Cosserat Model Optimisation Function
+%Models multi-backbone continuum robot with tendons
+%Tendons modelled using coupled tendon method (Rucker,2011)
 clear variables
 close all
 clc 
@@ -81,7 +85,7 @@ F_end = [0;0;0];
 M_end = [0;0;0];
 
 %Input tension
-tau = [10 0 0 0]; %Tension for each tendon (N)
+tau = [1 0 0 0]; %Tension for each tendon (N)
 
 %% /////// Initialise Model Variables //////////
 %Initial n values are [0;0;0] for all rods at all discs
@@ -95,7 +99,7 @@ s_disc = ones(4,1)*d(1);
 
 %Create initial guess vector (56 elements)
 guess = [nm_base;nm_disc;s_disc];
-%guess =[2.56960681229459e-06;0.486379053704807;-4.46272496602400;-0.0234049369324981;1.80471070896491e-07;-5.46898103610553e-07;-1.02394018942552e-05;-0.686484351587372;-7.81395347776497;-1.69252647520173e-06;-0.144971043260573;-1.65031655135529;-3.14976671505154e-06;0.489969267764452;5.57726725225122;-2.07797282876364e-06;-0.144974053899226;-1.65027229063539;0.00325929074879909;1.55416405772534e-07;1.10352411584471e-06;-0.0112906482362051;1.03771431624075e-07;-6.23148496823441e-08;-0.0233610985211333;-1.00147708758699e-07;-4.44417317416802e-07;-0.0112901899960900;1.02754422737977e-07;2.01041682031975e-07;-1.89137689148635e-06;-0.187589586400671;-2.02275347985265;0.00995772143090132;-8.78445418140338e-08;4.75426284445245e-07;-7.21130783280786e-06;-0.250662636487879;-2.70254506961868;-5.99675859710489e-07;0.0341351220449601;0.368195380235578;1.06485846808159e-05;0.369976984883335;3.98896217870640;-9.46221309922023e-07;0.0341401133382594;0.368140991313971;0.00837278632542334;-6.12613966753591e-07;-1.00189368432324e-06;0.0142897903934617;-2.13699527481103e-07;8.70868581179099e-08;0.0200647377087361;1.14604273926786e-07;4.30891216597192e-07;0.0142891008843693;-2.59484191851764e-07;-1.72461376900905e-07;0.123385565794129;0.125047030053345;0.126743463642817;0.125047004670198];
+
 %% ///////// Solve Optimisation Problem //////////
 %Set fsolve options
 options = optimoptions(@fsolve,'Algorithm','levenberg-marquardt','Display','iter-detailed','MaxFunctionEvaluations',100000,'MaxIterations',2000);
@@ -104,9 +108,6 @@ options = optimoptions(@fsolve,'Algorithm','levenberg-marquardt','Display','iter
 [final_guess,fval,exitflag,output] = fsolve(@MultiShootingMethodTendon,guess,options);
 
 %% /////////// Plot Solution //////////////
-%Calculate arclength to check solution feasibility
-arc = arclength(pb(:,1),pb(:,2),pb(:,3));
-
 %Plot solution for central backbone
 hold on
 plot3(pb(:,1),pb(:,2),pb(:,3),'b');

@@ -1,5 +1,9 @@
-%Cosserat Model Script based on 2017 paper
-%Model multiple backbones with intermediate discs for given state
+%MultiBackboneScript
+%Written by Athan Xenos
+
+%Cosserat Model Script based on 2017 paper by Orekhov
+%Models multi-backbone continuum robot with tendons
+%Tendons modelled by point moments
 clear variables
 close all
 clc 

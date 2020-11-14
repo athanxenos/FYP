@@ -1,6 +1,8 @@
 function [p,R,v,u,s] = TendonODE_Eval(p0,R0,v0,u0,L_start,L_finish)
-%Function that evaluates ODE's from L_start to L_finish
+%TendonODE_Eval
+%Written by Athan Xenos
 
+%Function that evaluates coupled tendon ODE from L_start to L_finish
 %Inputs:
 % p0,R0,v0,u0 - Initial state variables of rod 
 % L_start - starting length

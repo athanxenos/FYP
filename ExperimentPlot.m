@@ -1,10 +1,15 @@
-%Results Plot
+%ExperimentPlot
+%Written by Athan Xenos
+
+%Script that plots simulation data from MultiBackboneOpti against
+%experimental data
+
 clear variables
 clear global
 close all
 clc 
 
-%Import experimental data and fit 2 constant curvature arcs to endpoint
+%Import experimental data and fit 2 constant curvature arcs to endpoints
 x20 = [0.11,2.47,9.5,18.88,30.39,40.88,47.86,52.13,53.85]/1000;
 y20 = [0,35.7,71.39,103.97,138.58,174.75,208.95,243.69,278.51]/1000;
 p20 = ConstantCurvature(x20(end),y20(end));
@@ -21,6 +26,7 @@ x80 = [0.29,9.23,34.34,63.77,98.65,131.17,153.28,167.37,174.76]/1000;
 y80 = [0,35.07,61.17,75.82,87.13,105.39,132.63,165.03,198.92]/1000;
 p80 = ConstantCurvature(x80(end),y80(end));
 
+%Calculate distance and error between curves
 [k2,dist2] = dsearchn(p20,[x20',y20']);
 error2 = norm(dist2);
 [k4,dist4] = dsearchn(p40,[x40',y40']);
@@ -45,6 +51,5 @@ xlabel('y (m)');
 ylabel('z (m)');
 grid on
 axis([0,0.3,0,0.3]);
-
 title('Constant Curvature Model vs Experimental Data')
 legend('Experiment 1 Data','Experiment 2 Data','Experiment 3 Data','Experiment 4 Data','Two CC Arcs','Two CC Arcs','Two CC Arcs','Two CC Arcs','Location','SouthEast');

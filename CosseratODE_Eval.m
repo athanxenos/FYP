@@ -1,7 +1,8 @@
-function [p,R,n,m,s] = RodODE_Eval_force(p0,R0,n0,m0,L_start,L_finish)
-%Function that evaluates ODE's from L_start to L_finish
+function [p,R,n,m,s] = CosseratODE_Eval(p0,R0,n0,m0,L_start,L_finish)
+%CosseratODE_Eval
 %Written by Athan Xenos
 
+%Function that evaluates Cosserat ODE from L_start to L_finish
 %Inputs:
 % p0,R0,n0,m0 - Initial state variables of rod 
 % L_start - starting length
@@ -18,7 +19,7 @@ L = linspace(L_start,L_finish);
 y0 = [p0 ; reshape(R0,9,1); n0; m0];
 
 %Solve ODE from L_start to L_finish
-[s,y] = ode45(@rod_ode_force, L, y0);
+[s,y] = ode45(@CosseratODE, L, y0);
 
 %Extract solution curve values
 n = length(s);

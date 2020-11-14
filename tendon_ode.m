@@ -1,5 +1,7 @@
 function [yd] = tendon_ode(s,y)
-%Function to evaluate ODE system at one step for backbone with tendons
+%tendon_ode
+%Written by Athan Xenos
+%Function to evaluate coupled tendon ODE system for one step
 
 %Inputs:
 %Systems variables described as state vector - y (p,R,v,u)
@@ -35,7 +37,6 @@ alpha = 0;
 beta =0;
 
 %Iterate through each tendon
-
 for i=1:n_t
     
     %Tendon curve velocity in body frame
@@ -78,7 +79,6 @@ Rd = R*hat(u);
 %Extract values from vector
 vd = vu_d(1:3);
 ud = vu_d(4:6);
-
 yd = [pd ; reshape(Rd,9,1); vd; ud];
 end
 

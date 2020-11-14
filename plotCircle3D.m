@@ -1,3 +1,6 @@
+%Function used to plot circels in 3D
+%Source: https://au.mathworks.com/matlabcentral/fileexchange/26588-plot-circle-in-3d
+
 function plotCircle3D(center,normal,radius)
 
 theta=0:0.01:2*pi;

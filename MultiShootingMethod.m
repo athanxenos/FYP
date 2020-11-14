@@ -1,15 +1,17 @@
 function [residual] = MultiShootingMethod(guess)
-%Function that evaluates Multi Backbone ODE's for input guess and returns
-%residual of position/orientation/equilibrium conditions
+%MultiShootingMethod
 %Written by Athan Xenos
 
+%Function that evaluates Multi Backbone ODE's for input pose guess and returns
+%residual of position/orientation/equilibrium conditions
+
 %Inputs:
-% guess - 64x1 vector with initial guess for n,m,s_disc (52 length minimum)
+% guess - vector with initial guess for n,m,s_disc 
 % All v/u values are initialised as [0;0;1] and [0;0;0]
 % s_disc intersections are initialised for straight rod position
 
 %Outputs:
-% residual - returns error vector for given guess (56 length minimum)
+% residual - returns error vector for given guess 
 
 %Define global variables for model
 %Model Parameters
@@ -33,6 +35,7 @@ global pb_L
 global disc_normal
 global end_normal
 
+%Set residual length
 residual = zeros(30+26*nd,1);
 
 %Define initial conditions for central backbone
@@ -50,6 +53,7 @@ ms = cell(1,n);
 Rs = cell(1,n);
 s_s = cell(1,n);
 
+%Initialise vectors/matrices for loop
 disc_normal = zeros(nd,3);
 R_disc = zeros(3,3,nd+1);
 R_disc(:,:,1) = Rb0;
@@ -57,18 +61,21 @@ p_disc = zeros(nd,3);
 p_disc(1,:) = pb0;
 s_disc = zeros(nd+1,4);
 
+%Loop through each robot disc
 for j =1:nd
     
-    %Extract guess for central rod
+    %Extract n/m guess for central rod at base
     nb0 = guess(1+30*(j-1):3+30*(j-1));
     mb0 = guess(4+30*(j-1):6+30*(j-1));
     
+    %Extract n/m guess for central rod at next disc
     nb_Dguess = guess(1+30*j:3+30*j);
     mb_Dguess = guess(4+30*j:6+30*j);
     
-    %Integrate central backbone upto first disc
-    [pb_temp,Rb_temp,nb_temp,mb_temp,s_temp] = RodODE_Eval_force(p_disc(j,:)',R_disc(:,:,j),nb0,mb0,d(j),d(j+1));
+    %Integrate central backbone upto next disc
+    [pb_temp,Rb_temp,nb_temp,mb_temp,s_temp] = CosseratODE_Eval(p_disc(j,:)',R_disc(:,:,j),nb0,mb0,d(j),d(j+1));
     
+    %Special condition for first disc
     if j==1
         s = s_temp;
         pb = pb_temp;
@@ -105,20 +112,23 @@ for j =1:nd
     E_inter = zeros(1,n);
     ns_Dguess = zeros(3,n);
     ms_Dguess = zeros(3,n);
-    
+   
+    %Extract disc intersection arclengths
     s_disc(j+1,:) = guess(30*(nd+1)+1+4*(j-1):30*(nd+1)+4+4*(j-1));
     
-    %Integrate secondary rods until they intersect first disc
+    %Loop thorugh and integrate secondary rods until they intersect next disc
     for i=1:n
         
+        %Extract n/m guess for secondary rod at base
         ns0 = guess(7+30*(j-1)+3*(i-1):9+30*(j-1)+3*(i-1));
         ms0 = guess(19+30*(j-1)+3*(i-1):21+30*(j-1)+3*(i-1));
         
+        %Extract n/m guess for secondary rod at next disc
         ns_Dguess(:,i) = guess(37+30*(j-1)+3*(i-1):39+30*(j-1)+3*(i-1));
         ms_Dguess(:,i) = guess(49+30*(j-1)+3*(i-1):51+30*(j-1)+3*(i-1));
         
-        %Integrate secondary rods to first disc
-        [ps_temp,Rs_temp,ns_temp,ms_temp,s_temp] = RodODE_Eval_force(ps0(:,i),Rs0(:,:,i),ns0,ms0,s_disc(j,i),s_disc(j+1,i));
+        %Integrate secondary rods to next disc
+        [ps_temp,Rs_temp,ns_temp,ms_temp,s_temp] = CosseratODE_Eval(ps0(:,i),Rs0(:,:,i),ns0,ms0,s_disc(j,i),s_disc(j+1,i));
         
         %Concatenate s,p,R,v,u parameters 
         s_s{i} = [s_s{i};s_temp(2:end)];
@@ -127,6 +137,7 @@ for j =1:nd
         ns{i} = [ns{i}; ns_temp(2:end,:)];
         ms{i} = [ms{i}; ms_temp(2:end,:)];
         
+        %Extract disc position/orientation
         Rs0(:,:,i) = Rs{i}(:,:,end);
         ps0(:,i) = ps{i}(end,:)';
         
@@ -182,8 +193,8 @@ for j =1:nd
 end
 
 %% //////////// Last Disc to End Effector ////////////
-%Integrate central backbone from first disc to end effector
-[pb_end,Rb_end,nb_end,mb_end,s_L] = RodODE_Eval_force(pb(end,:)',Rb(:,:,end),nb_Dguess,mb_Dguess,d(end-1),d(end));
+%Integrate central backbone from last disc to end effector
+[pb_end,Rb_end,nb_end,mb_end,s_L] = CosseratODE_Eval(pb(end,:)',Rb(:,:,end),nb_Dguess,mb_Dguess,d(end-1),d(end));
 
 %Concatenate s,p,R,v,u parameters 
 s = [s;s_L(2:end)];
@@ -208,14 +219,15 @@ mL_sum = zeros(3,1);
 E5 = zeros(3,n);
 E6 = zeros(3,n);
 
-%Integrate secondary rods from first disc to end effector
+%Integrate secondary rods from last disc to end effector
 for i=1:n
     
+    %Extract n/m guess for secondary rods at last disc
     ns_Dguess = guess(7+30*nd+3*(i-1):9+30*nd+3*(i-1));
     ms_Dguess = guess(19+30*nd+3*(i-1):21+30*nd+3*(i-1));
     
-    %Integrate secondary rods from first disc to end effector 
-    [ps_L,Rs_L,ns_L,ms_L,s_c] = RodODE_Eval_force(ps{i}(end,:)',Rs{i}(:,:,end),ns_Dguess,ms_Dguess,s_disc(end,i),d(end)); 
+    %Integrate secondary rods from last disc to end effector 
+    [ps_L,Rs_L,ns_L,ms_L,s_c] = CosseratODE_Eval(ps{i}(end,:)',Rs{i}(:,:,end),ns_Dguess,ms_Dguess,s_disc(end,i),d(end)); 
     
     %Concatenate s,p,R,v,u parameters 
     s_s{i} = [s_s{i};s_c(2:end)];
@@ -246,6 +258,4 @@ E8 = mL_sum + cross(pb_L,nb_L) + mb_L - cross(pb_L,F_end) - M_end;
 
 %Combine Residual Vector
 residual(1+26*nd:30+26*nd) = [E5(:);E6(:);E7;E8];
-
 end
-

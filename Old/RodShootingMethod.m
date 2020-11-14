@@ -1,4 +1,7 @@
 function residual = RodShootingMethod(guess)
+%RodShootingMethod
+%Written by Athan Xenos
+
 %Function that evaluates ODE's for input guess and returns residual when
 %compared to known boundary conditions
 
@@ -17,6 +20,7 @@ global v_ref
 global tau
 global p
 
+%Define length and number of rods
 n_t = 4;
 L = 0.25;
 

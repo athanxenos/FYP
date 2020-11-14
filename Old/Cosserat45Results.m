@@ -1,5 +1,9 @@
-%Cosserat Model Script based on 2011 paper
-%Plots final robot pose for different input tensions
+%Cosserat45Results
+%Written by Athan Xenos
+
+%Cosserat Model Script based on (Rucker,2011) paper
+%Plots single backbone for different input tensions
+%Tendons are coupled to backbone
 clear all
 close all
 clc 
@@ -50,7 +54,7 @@ u0=[0;0;0]; %Angular rate of change of frame
 %Guess input for fsolve
 init_guess = [v0; u0];
 
-%Define tau step size
+%Define tension step size
 step=0:0.5:10;
 n=length(step);
 tau_range = zeros(n,4);
@@ -60,7 +64,6 @@ for i=1:n
     %Vary Tension Input
     tau = tau_range(i,:); %Tension for each tendon (N)
    
-
     %Input initial guess into fsolve to optimise solution
     final_guess = fsolve(@RodShootingMethod,init_guess);
     

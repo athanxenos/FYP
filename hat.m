@@ -1,4 +1,7 @@
 function [u_hat] = hat(u)
+%hat
+%Written by Athan Xenos
+
 %Hat operator function
 %Converts R3 vector to 3x3 matrix, R6 vector to 4x4 matrix
 

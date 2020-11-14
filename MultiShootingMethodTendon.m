@@ -1,14 +1,18 @@
 function [residual] = MultiShootingMethodTendon(guess)
-%Function that evaluates Multi Backbone ODE's for input guess and returns
+%MultiShootingMethod
+%Written by Athan Xenos
+
+%Function that evaluates Multi Backbone ODE's for input pose guess and returns
 %residual of position/orientation/equilibrium conditions
+%Uses coupled tendon method
 
 %Inputs:
-% guess - 64x1 vector with initial guess for v,u,s_disc (52 length minimum)
+% guess - 64x1 vector with initial guess for v,u,s_disc 
 % All v/u values are initialised as [0;0;1] and [0;0;0]
 % s_disc intersections are initialised for straight rod position
 
 %Outputs:
-% residual - returns error vector for given guess (56 length minimum)
+% residual - returns error vector for given guess 
 
 %Define global variables for model
 %ODE parameters
@@ -105,7 +109,6 @@ end
 F_disc = sum(F_tendon,2);
 M_disc = sum(L_tendon,2);
 
-
 %Initialise constraint/error variables
 pos_D = zeros(3,n);
 ori_D = zeros(3,n);
@@ -115,17 +118,13 @@ mD_sum = zeros(3,1);
 E1 = zeros(2,n);
 E2 = zeros(2,n);
 E_inter = zeros(1,n);
-%vs0 = zeros(3,n);
-%us0 = zeros(3,n);
+
 
 %Integrate secondary rods until they intersect first disc
 for i=1:n
   
     %Integrate secondary rods to first disc
-    %vs0(:,i) = K_se^-1*Rs0'*ns0(:,i) + v_ref;
-    %us0(:,i) = K_bt^-1*Rs0'*ms0(:,i);
-    
-    [ps{i},Rs{i},ns{i},ms{i},s_s{i}] = RodODE_Eval_force(r(:,i),Rs0,ns0(:,i),ms0(:,i),0,s_disc(i));
+    [ps{i},Rs{i},ns{i},ms{i},s_s{i}] = CosseratODE_Eval(r(:,i),Rs0,ns0(:,i),ms0(:,i),0,s_disc(i));
     
     %Calculate disc intersection error
     intersect = R_disc.'*(ps{i}(end,:)-p_disc)';
@@ -144,8 +143,6 @@ for i=1:n
     E2(:,i) = ori_D(1:2,i);
     
     %Calculate n,m at disc (negative is included as they enter disc)(global)
-    %n_D(:,i) = Rs{i}(:,:,end)*K_se*(vs{i}(end,:)'-v_ref);
-    %m_D(:,i) = Rs{i}(:,:,end)*K_bt*us{i}(end,:)';
     n_D(:,i) = ns{i}(end,:)';
     m_D(:,i) = ms{i}(end,:)';
 
@@ -164,21 +161,15 @@ E3 = -nd_plus + nd_minus - F_disc;
 
 %Moment Equilibrium Error
 E4 = mD_sum + cross(p_disc',(-nb_Dguess + nb_D - F_disc)) - mb_Dguess + mb_D - M_disc;
-%E4 = mD_sum  - mb_Dguess + mb_D - M_disc;
 
 %% //////////// First Disc to End Effector ////////////
 %Integrate central backbone from first disc to end effector
-%vbD = K_se^-1*Rb(:,:,end)'*nb_Dguess + v_ref;
-%ubD = K_bt^-1*Rb(:,:,end)'*mb_Dguess;
-
-[pb_end,Rb_end,nb,mb,s_L] = RodODE_Eval_force(pb(end,:)',Rb(:,:,end),nb_Dguess,mb_Dguess,d(1),d(2));
+[pb_end,Rb_end,nb,mb,s_L] = CosseratODE_Eval(pb(end,:)',Rb(:,:,end),nb_Dguess,mb_Dguess,d(1),d(2));
 
 %Concatenate s,p,R,v,u parameters 
 s = [s;s_L(2:end)];
 pb = [pb;pb_end(2:end,:)];
 Rb = cat(3,Rb,Rb_end(:,:,2:end));
-%vb = [vb;vb_end(2:end,:)];
-%ub = [ub;ub_end(2:end,:)];
 
 %Find end effector position/orientation
 pb_L = pb(end,:)';       
@@ -197,17 +188,12 @@ m_L = zeros(3,n);
 mL_sum = zeros(3,1);
 E5 = zeros(3,n);
 E6 = zeros(3,n);
-%vsD = zeros(3,n);
-%usD = zeros(3,n);
 
 %Integrate secondary rods from first disc to end effector
 for i=1:n
     
     %Integrate secondary rods from first disc to end effector 
-    %vsD(:,i) = K_se^-1*Rs{i}(:,:,end)'*ns_Dguess(:,i) + v_ref;
-    %usD(:,i) = K_bt^-1*Rs{i}(:,:,end)'*ms_Dguess(:,i);
-    
-    [ps_L,Rs_L,ns_L,ms_L,s_c] = RodODE_Eval_force(ps{i}(end,:)',Rs{i}(:,:,end),ns_Dguess(:,i),ms_Dguess(:,i),s_disc(i),d(2)); 
+    [ps_L,Rs_L,ns_L,ms_L,s_c] = CosseratODE_Eval(ps{i}(end,:)',Rs{i}(:,:,end),ns_Dguess(:,i),ms_Dguess(:,i),s_disc(i),d(2)); 
     
     %Concatenate s,p,R,v,u parameters 
     s_s{i} = [s_s{i};s_c(2:end)];
@@ -217,8 +203,6 @@ for i=1:n
     ms{i} = [ms{i}; ms_L(2:end,:)];
     
     %Calcualte n,m values at end effector for secondary rod (global)
-    %n_L(:,i) = Rs{i}(:,:,end)*K_se*(vs{i}(end,:)'-v_ref);
-    %m_L(:,i) = Rs{i}(:,:,end)*K_bt*us{i}(end,:)';
     n_L(:,i) = ns{i}(end,:)';
     m_L(:,i) = ms{i}(end,:)';
     
@@ -240,6 +224,5 @@ E8 = mL_sum + cross(pb_L,nb_L) + mb_L - cross(pb_L,F_end) - M_end;
 
 %Combine Residual Vector
 residual = [E1(:);E2(:);E3;E4;E_inter(:);E5(:);E6(:);E7;E8];
-
 end
 
